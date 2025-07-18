@@ -66,6 +66,93 @@ export interface AppConfig {
   enableAnimations: boolean;
 }
 
+// B站API相关类型
+export interface BiliApiResponse<T = any> {
+  code: number;
+  message: string;
+  data: T;
+}
+
+export interface VideoInfo {
+  id: number;
+  type: number;
+  title: string;
+  duration: number;
+  bvid?: string;
+  aid?: number;
+  pic?: string;
+  upper?: {
+    mid: number;
+    name: string;
+  };
+}
+
+export interface FavoriteInfo {
+  id: number;
+  title: string;
+  media_count: number;
+  upper: {
+    mid: number;
+    name: string;
+  };
+}
+
+export interface ToViewInfo {
+  count: number;
+  list: VideoInfo[];
+}
+
+// 脚本相关类型
+export interface ScriptConfig {
+  id: string;
+  name: string;
+  description: string;
+  category: 'tool' | 'operation';
+  parameters: ScriptParameter[];
+  isRunning: boolean;
+  lastRun?: Date;
+}
+
+export interface ScriptParameter {
+  key: string;
+  label: string;
+  type: 'text' | 'number' | 'boolean' | 'select' | 'textarea';
+  defaultValue: any;
+  required?: boolean;
+  options?: { label: string; value: any }[];
+  placeholder?: string;
+  description?: string;
+}
+
+export interface ScriptExecution {
+  id: string;
+  scriptId: string;
+  status: 'running' | 'completed' | 'failed' | 'stopped';
+  startTime: Date;
+  endTime?: Date;
+  progress: number;
+  logs: LogEntry[];
+  result?: any;
+  error?: string;
+}
+
+export interface LogEntry {
+  id: string;
+  timestamp: Date;
+  level: 'info' | 'warn' | 'error' | 'success';
+  message: string;
+  scriptId?: string;
+}
+
+// 应用状态类型
+export interface AppState {
+  scripts: ScriptConfig[];
+  executions: ScriptExecution[];
+  logs: LogEntry[];
+  selectedScript: string | null;
+  isModalOpen: boolean;
+}
+
 // 导出所有类型
 export type {
   JSX

@@ -1,0 +1,281 @@
+import { biliApiClient } from './client';
+import { VideoInfo, FavoriteInfo, ToViewInfo, BiliApiResponse } from '../types';
+import { GM_getValue } from '$';
+
+/**
+ * 获取CSRF Token（从cookie中获取bili_jct）
+ */
+function getCsrfToken(): string {
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === 'bili_jct') {
+      return value;
+    }
+  }
+  throw new Error('CSRF token not found. Please make sure you are logged in.');
+}
+
+/**
+ * 获取用户ID（从cookie中获取DedeUserID）
+ */
+function getUserId(): string {
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === 'DedeUserID') {
+      return value;
+    }
+  }
+  throw new Error('User ID not found. Please make sure you are logged in.');
+}
+
+/**
+ * 获取稍后再看列表
+ */
+export async function getToViewList(): Promise<ToViewInfo> {
+  const response = await biliApiClient.get<ToViewInfo>('https://api.bilibili.com/x/v2/history/toview');
+  if (response.code !== 0) {
+    throw new Error(`Failed to get toview list: ${response.message}`);
+  }
+  return response.data;
+}
+
+/**
+ * 获取收藏夹信息
+ */
+export async function getFavoriteInfo(favoriteId: number): Promise<FavoriteInfo> {
+  const response = await biliApiClient.get<FavoriteInfo>(
+    'https://api.bilibili.com/x/v3/fav/folder/info',
+    { media_id: favoriteId }
+  );
+  if (response.code !== 0) {
+    throw new Error(`Failed to get favorite info: ${response.message}`);
+  }
+  return response.data;
+}
+
+/**
+ * 获取收藏夹资源列表
+ */
+export async function getFavoriteResourceList(
+  favoriteId: number,
+  pageIndex: number = 1,
+  pageSize: number = 20
+): Promise<{ info: FavoriteInfo; medias: VideoInfo[]; has_more: boolean }> {
+  const response = await biliApiClient.get(
+    'https://api.bilibili.com/x/v3/fav/resource/list',
+    {
+      media_id: favoriteId,
+      pn: pageIndex,
+      ps: pageSize,
+      keyword: '',
+      order: 'mtime',
+      type: 0,
+      tid: 0,
+      platform: 'web',
+    }
+  );
+  if (response.code !== 0) {
+    throw new Error(`Failed to get favorite resource list: ${response.message}`);
+  }
+  return response.data;
+}
+
+/**
+ * 添加视频到稍后再看
+ */
+export async function addToToView(videoId: number): Promise<void> {
+  const response = await biliApiClient.post(
+    'https://api.bilibili.com/x/v2/history/toview/add',
+    { aid: videoId, csrf: getCsrfToken() }
+  );
+  if (response.code !== 0) {
+    throw new Error(`Failed to add to toview: ${response.message}`);
+  }
+}
+
+/**
+ * 从稍后再看删除视频
+ */
+export async function deleteFromToView(videoIds: number[]): Promise<void> {
+  const response = await biliApiClient.post(
+    'https://api.bilibili.com/x/v2/history/toview/del',
+    { 
+      viewed: 'false',
+      aid: videoIds.join(','),
+      csrf: getCsrfToken()
+    }
+  );
+  if (response.code !== 0) {
+    throw new Error(`Failed to delete from toview: ${response.message}`);
+  }
+}
+
+/**
+ * 清空稍后再看
+ */
+export async function clearToViewList(): Promise<void> {
+  const response = await biliApiClient.post(
+    'https://api.bilibili.com/x/v2/history/toview/clear',
+    { csrf: getCsrfToken() }
+  );
+  if (response.code !== 0) {
+    throw new Error(`Failed to clear toview list: ${response.message}`);
+  }
+}
+
+/**
+ * 从收藏夹删除视频
+ */
+export async function deleteFromFavorite(
+  favoriteId: number, 
+  resourceIds: Array<{ id: number; type: number }>
+): Promise<void> {
+  const resources = resourceIds.map(r => `${r.id}:${r.type}`).join(',');
+  const response = await biliApiClient.post(
+    'https://api.bilibili.com/x/v3/fav/resource/del',
+    {
+      media_id: favoriteId,
+      resources,
+      csrf: getCsrfToken()
+    }
+  );
+  if (response.code !== 0) {
+    throw new Error(`Failed to delete from favorite: ${response.message}`);
+  }
+}
+
+/**
+ * 添加到收藏夹
+ */
+export async function addToFavorite(
+  favoriteId: number, 
+  resourceIds: Array<{ id: number; type: number }>
+): Promise<void> {
+  // B站API一次只能添加一个资源
+  for (const resource of resourceIds) {
+    const response = await biliApiClient.post(
+      'https://api.bilibili.com/x/v3/fav/resource/deal',
+      {
+        rid: resource.id,
+        type: resource.type,
+        add_media_ids: favoriteId.toString(),
+        del_media_ids: '',
+        csrf: getCsrfToken()
+      }
+    );
+    if (response.code !== 0) {
+      throw new Error(`Failed to add to favorite: ${response.message}`);
+    }
+  }
+}
+
+/**
+ * 移动收藏夹中的视频到另一个收藏夹
+ */
+export async function moveToFavorite(
+  fromFavoriteId: number,
+  toFavoriteId: number,
+  resourceIds: Array<{ id: number; type: number }>
+): Promise<void> {
+  const resources = resourceIds.map(r => `${r.id}:${r.type}`).join(',');
+  const response = await biliApiClient.post(
+    'https://api.bilibili.com/x/v3/fav/resource/move',
+    {
+      src_media_id: fromFavoriteId.toString(),
+      tar_media_id: toFavoriteId.toString(),
+      resources,
+      csrf: getCsrfToken()
+    }
+  );
+  if (response.code !== 0) {
+    throw new Error(`Failed to move to favorite: ${response.message}`);
+  }
+}
+
+/**
+ * 获取收藏夹中的资源ID列表
+ */
+export async function getFavoriteResourceIds(favoriteId: number): Promise<number[]> {
+  const response = await biliApiClient.get(
+    'https://api.bilibili.com/x/v3/fav/resource/ids',
+    { media_id: favoriteId }
+  );
+  if (response.code !== 0) {
+    throw new Error(`Failed to get favorite resource ids: ${response.message}`);
+  }
+  return response.data;
+}
+
+/**
+ * 获取用户动态列表
+ */
+export async function getDynamicList(uid?: number, offset: string = ''): Promise<any> {
+  const response = await biliApiClient.get(
+    'https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space',
+    {
+      offset,
+      host_mid: uid || getUserId(),
+      timezone_offset: -480,
+    }
+  );
+  if (response.code !== 0) {
+    throw new Error(`Failed to get dynamic list: ${response.message}`);
+  }
+  return response.data;
+}
+
+/**
+ * 删除动态
+ */
+export async function deleteDynamic(dynamicId: string): Promise<void> {
+  const response = await biliApiClient.post(
+    'https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/rm_dynamic',
+    { dynamic_id: dynamicId },
+    undefined
+  );
+  if (response.code !== 0) {
+    throw new Error(`Failed to delete dynamic: ${response.message}`);
+  }
+}
+
+/**
+ * 获取抽奖信息
+ */
+export async function getLotteryInfo(dynamicId: string): Promise<any> {
+  const response = await biliApiClient.get(
+    'https://api.vc.bilibili.com/lottery_svr/v1/lottery_svr/lottery_notice',
+    {
+      business_id: dynamicId,
+      business_type: '1',
+      csrf: getCsrfToken(),
+      web_location: '333.1330'
+    }
+  );
+  if (response.code !== 0) {
+    throw new Error(`Failed to get lottery info: ${response.message}`);
+  }
+  return response.data;
+}
+
+/**
+ * 获取视频信息
+ */
+export async function getVideoInfo(videoId: string): Promise<VideoInfo> {
+  const url = `https://www.bilibili.com/video/${videoId}/`;
+  const response = await biliApiClient.get(url);
+
+  // 从HTML中提取标题（简化版本，实际应该解析HTML）
+  const titleMatch = response.toString().match(/<title[^>]*>([^<]+)<\/title>/);
+  const title = titleMatch ? titleMatch[1] : 'Unknown Title';
+
+  return {
+    id: 0, // 需要从其他API获取
+    type: 2,
+    title,
+    duration: 0, // 需要从其他API获取
+    bvid: videoId.startsWith('BV') ? videoId : undefined,
+    aid: videoId.startsWith('av') ? parseInt(videoId.slice(2)) : undefined,
+  };
+}

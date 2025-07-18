@@ -16,7 +16,7 @@ export function App() {
 
   return (
     <>
-      <FloatingButton onClick={handleOpenModal} />
+      {!isModalOpen && <FloatingButton onClick={handleOpenModal} />}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
         <TaskPanel />
       </Modal>

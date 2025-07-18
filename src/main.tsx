@@ -1,6 +1,5 @@
 import { render } from 'preact';
 import { App } from './app';
-//import './index.css';
 
 render(
   <App />,
@@ -8,6 +7,7 @@ render(
     const app = document.createElement('div');
     app.id = 'bili-tasks-app';
     document.body.append(app);
+    console.log(11111)
     return app;
   })(),
 );
