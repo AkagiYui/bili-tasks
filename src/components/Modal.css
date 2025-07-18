@@ -79,6 +79,7 @@
   height: 24px;
   transition: transform 0.2s ease;
   display: block;
+  flex-shrink: 0;
 }
 
 .modal-body {

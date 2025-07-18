@@ -46,7 +46,7 @@ export function Modal({ isOpen, onClose, children }: ModalProps): JSX.Element | 
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M19 14L12 21L5 14"
+                d="M19 9L12 16L5 9"
                 stroke="currentColor"
                 stroke-width="2"
                 stroke-linecap="round"
