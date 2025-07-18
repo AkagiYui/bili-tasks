@@ -10,6 +10,7 @@ export default defineConfig({
       entry: 'src/main.tsx',
       userscript: {
         name: '【哔哩哔哩】一些任务',
+        description: '可以一键执行一系列操作。',
         icon: 'https://static.hdslb.com/images/favicon.ico',
         namespace: 'https://github.com/AkagiYui/UserScript',
         match: ['https://space.bilibili.com/*/favlist*'],
