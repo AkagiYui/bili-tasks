@@ -250,7 +250,7 @@ export class MoveShortestToToviewExecutor extends ScriptExecutor {
  */
 export class AddToviewToFavoriteExecutor extends ScriptExecutor {
   public async execute(parameters: Record<string, any>): Promise<any> {
-    const { favoriteId, maxCount } = parameters;
+    const { favoriteId, maxCount, disableSpaceCheck } = parameters;
 
     if (!favoriteId) {
       throw new Error('请输入收藏夹ID');
@@ -273,20 +273,26 @@ export class AddToviewToFavoriteExecutor extends ScriptExecutor {
       this.log('info', `准备添加 ${videosToAdd.length} 个视频到收藏夹`);
       this.updateProgress(10);
 
-      // 获取收藏夹当前信息，检查容量
-      this.log('info', '正在检查收藏夹容量...');
-      const favoriteInfo = await getFavoriteInfo(favoriteId);
-      const currentCount = favoriteInfo.media_count;
-      const toAddCount = videosToAdd.length;
-      const remainingSpace = 1000 - currentCount;
+      // 根据参数决定是否进行容量检查
+      if (disableSpaceCheck) {
+        this.log('info', '已关闭空间检查，将跳过容量验证');
+        this.log('warn', '注意：跳过容量检查可能导致添加失败，建议仅在添加重复视频时使用');
+      } else {
+        // 获取收藏夹当前信息，检查容量
+        this.log('info', '正在检查收藏夹容量...');
+        const favoriteInfo = await getFavoriteInfo(favoriteId);
+        const currentCount = favoriteInfo.media_count;
+        const toAddCount = videosToAdd.length;
+        const remainingSpace = 1000 - currentCount;
 
-      this.log('info', `收藏夹当前视频数量: ${currentCount}/1000`);
-      this.log('info', `待添加视频数量: ${toAddCount}`);
-      this.log('info', `剩余空间: ${remainingSpace}`);
+        this.log('info', `收藏夹当前视频数量: ${currentCount}/1000`);
+        this.log('info', `待添加视频数量: ${toAddCount}`);
+        this.log('info', `剩余空间: ${remainingSpace}`);
 
-      if (currentCount + toAddCount > 1000) {
-        this.log('error', `收藏夹空间不足，无法添加所有视频。当前: ${currentCount}，待添加: ${toAddCount}，剩余空间: ${remainingSpace}`);
-        throw new Error('收藏夹空间不足，无法添加所有视频');
+        if (currentCount + toAddCount > 1000) {
+          this.log('error', `收藏夹空间不足，无法添加所有视频。当前: ${currentCount}，待添加: ${toAddCount}，剩余空间: ${remainingSpace}`);
+          throw new Error('收藏夹空间不足，无法添加所有视频');
+        }
       }
 
       this.updateProgress(20);

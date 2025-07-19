@@ -114,6 +114,14 @@ export const SCRIPT_CONFIGS: ScriptConfig[] = [
         defaultValue: 50,
         required: false,
         description: '最多添加多少个视频，0表示全部添加'
+      },
+      {
+        key: 'disableSpaceCheck',
+        label: '关闭收藏夹剩余空间检查',
+        type: 'boolean',
+        defaultValue: false,
+        required: false,
+        description: '启用后将跳过收藏夹容量检查，适用于添加重复视频的场景（重复视频不占用额外空间）'
       }
     ]
   },

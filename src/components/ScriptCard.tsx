@@ -286,7 +286,7 @@ export function ScriptCard({
           <label class="script-checkbox">
             <input
               type="checkbox"
-              checked={value || false}
+              checked={value === true}
               onChange={(e) => handleParameterChange(param.key, (e.target as HTMLInputElement).checked)}
               disabled={isRunning}
             />
