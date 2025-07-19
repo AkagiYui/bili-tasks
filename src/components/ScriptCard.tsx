@@ -368,7 +368,6 @@ export function ScriptCard({
         <div class="script-body">
           {script.parameters.length > 0 && (
             <div class="script-parameters">
-              <h4>参数配置</h4>
               {script.parameters.map(param => (
                 <div key={param.key} class="parameter-group">
                   <label class="parameter-label">

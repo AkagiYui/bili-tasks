@@ -35,7 +35,7 @@ export function ScriptManager(): JSX.Element {
   }));
 
   // 拖拽调整相关状态
-  const [panelRatio, setPanelRatio] = useState<number>(0.4); // 默认左侧40%
+  const [panelRatio, setPanelRatio] = useState<number>(0.6); // 默认左侧60%
   const [resizeState, setResizeState] = useState<ResizeState>({
     isDragging: false,
     startX: 0,
@@ -77,7 +77,7 @@ export function ScriptManager(): JSX.Element {
     }
 
     // 加载保存的面板比例
-    const savedRatio = GM_getValue('bili_tasks_panel_ratio', '0.4');
+    const savedRatio = GM_getValue('bili_tasks_panel_ratio', '0.6');
     try {
       const ratio = parseFloat(savedRatio);
       if (ratio >= 0.2 && ratio <= 0.8) { // 合理范围检查
@@ -296,7 +296,7 @@ export function ScriptManager(): JSX.Element {
   return (
     <div class="script-manager" ref={containerRef}>
       <div class="script-manager-header">
-        <h1>哔哩哔哩任务管理器</h1>
+        <h1>【哔哩哔哩】一些任务</h1>
         <p>作者：AkagiYui | 仓库：<a href="https://github.com/AkagiYui" target="_blank" rel="noopener noreferrer">github.com/AkagiYui</a></p>
         <div class="status-bar">
           <div class="status-item">
