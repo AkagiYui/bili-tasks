@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【哔哩哔哩】一些任务
 // @namespace    https://github.com/AkagiYui/UserScript
-// @version      0.0.1
+// @version      0.0.3
 // @author       AkagiYui
 // @description  可以一键执行一系列操作。
 // @license      MIT
@@ -9,14 +9,16 @@
 // @homepage     https://github.com/AkagiYui
 // @supportURL   https://github.com/AkagiYui/UserScript/issues
 // @match        https://space.bilibili.com/*/favlist*
+// @match        https://www.bilibili.com/list/ml*
+// @match        https://www.bilibili.com/list/watchlater*
 // @require      https://cdn.jsdelivr.net/npm/preact@10.26.9/dist/preact.min.js
-// @grant        GM_addStyles
+// @grant        GM_addStyle
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
-(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(' .floating-button{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px #00000026,0 2px 6px #0000001a;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:9999;font-family:inherit;outline:none}.floating-button:hover{transform:translateY(-2px);box-shadow:0 6px 16px #0003,0 3px 8px #00000026;background:linear-gradient(135deg,#5a6fd8,#6a4190)}.floating-button:active{transform:translateY(0);box-shadow:0 2px 8px #0003,0 1px 4px #0000001a}.floating-button:focus-visible{outline:2px solid #667eea;outline-offset:2px}.floating-button svg{width:24px;height:24px;transition:transform .2s ease}.floating-button:hover svg{transform:scale(1.1)}.floating-button *{box-sizing:border-box}@media (max-width: 768px){.floating-button{bottom:16px;right:16px;width:48px;height:48px}.floating-button svg{width:20px;height:20px}}.modal-backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background-color:#0009;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);z-index:10000;display:flex;align-items:center;justify-content:center;animation:modal-fade-in .3s cubic-bezier(.4,0,.2,1)}.modal-backdrop--closing{animation:modal-fade-out .3s cubic-bezier(.4,0,.2,1)}.modal-content{position:relative;width:100%;height:100%;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:0;box-shadow:0 20px 40px #0000004d;display:flex;flex-direction:column;animation:modal-slide-up .3s cubic-bezier(.4,0,.2,1);overflow:hidden}.modal-content--closing{animation:modal-slide-down .3s cubic-bezier(.4,0,.2,1)}.modal-header{position:absolute;top:20px;right:20px;z-index:10001}.modal-close-button{width:48px;height:48px;border-radius:50%;border:none;background:#fff3;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease;outline:none;padding:0;box-sizing:border-box}.modal-close-button:hover{background:#ffffff4d;transform:translateY(2px)}.modal-close-button:active{transform:translateY(0);background:#fff6}.modal-close-button:focus-visible{outline:2px solid rgba(255,255,255,.8);outline-offset:2px}.modal-close-button svg{width:24px;height:24px;transition:transform .2s ease;display:block;flex-shrink:0}.modal-body{flex:1;padding:80px 40px 40px;overflow-y:auto;color:#fff}@keyframes modal-fade-in{0%{opacity:0}to{opacity:1}}@keyframes modal-fade-out{0%{opacity:1}to{opacity:0}}@keyframes modal-slide-up{0%{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes modal-slide-down{0%{transform:translateY(0)}to{transform:translateY(100%)}}.modal-backdrop *,.modal-content *,.modal-header *,.modal-body *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif}@media (max-width: 768px){.modal-header{top:16px;right:16px}.modal-close-button{width:40px;height:40px}.modal-close-button svg{width:20px;height:20px}.modal-body{padding:60px 20px 20px}}.script-card{background:#0006;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-radius:12px;border:1px solid rgba(255,255,255,.3);margin-bottom:16px;transition:all .3s ease;overflow:hidden}.script-card:hover{background:#00000080;border-color:#fff6;transform:translateY(-2px)}.script-card.running{border-color:#4caf50;box-shadow:0 0 20px #4caf504d}.script-header{padding:20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;-webkit-user-select:none;user-select:none}.script-info{flex:1;min-width:0}.script-name{font-size:1.2rem;font-weight:600;margin:0 0 8px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)}.script-description{font-size:.9rem;margin:0 0 12px;color:#fffffff2;line-height:1.4;text-shadow:0 1px 2px rgba(0,0,0,.3)}.script-category{display:inline-block;padding:4px 12px;border-radius:16px;font-size:.8rem;font-weight:500;text-transform:uppercase;letter-spacing:.5px}.script-category.tool{background:#2196f333;color:#2196f3;border:1px solid rgba(33,150,243,.3)}.script-category.operation{background:#ff980033;color:#ff9800;border:1px solid rgba(255,152,0,.3)}.script-controls{display:flex;align-items:center;gap:12px;margin-left:20px}.progress-container{display:flex;align-items:center;gap:8px;min-width:120px}.progress-bar{width:80px;height:6px;background:#fff3;border-radius:3px;overflow:hidden}.progress-fill{height:100%;background:linear-gradient(90deg,#4caf50,#8bc34a);border-radius:3px;transition:width .3s ease}.progress-text{font-size:.8rem;color:#fffc;font-weight:500;min-width:32px}.expand-button{width:32px;height:32px;border:none;background:#ffffff1a;border-radius:50%;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease}.expand-button:hover{background:#fff3}.expand-button.expanded{transform:rotate(180deg)}.script-body{padding:0 20px 20px;border-top:1px solid rgba(255,255,255,.2);animation:slideDown .3s ease;background:#0003}@keyframes slideDown{0%{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}.script-parameters h4{font-size:1rem;font-weight:600;margin:20px 0 16px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)}.parameter-group{margin-bottom:20px}.parameter-label{display:block;font-size:.9rem;font-weight:500;margin-bottom:8px;color:#fffffff2;text-shadow:0 1px 2px rgba(0,0,0,.3)}.parameter-label .required{color:#f44336;margin-left:4px}.script-input,.script-select,.script-textarea{width:100%;padding:12px;border:1px solid rgba(255,255,255,.3);border-radius:8px;background:#0000004d;color:#fff;font-size:.9rem;transition:all .2s ease;text-shadow:0 1px 2px rgba(0,0,0,.3)}.script-input:focus,.script-select:focus,.script-textarea:focus{outline:none;border-color:#2196f3;background:#ffffff26}.script-input::placeholder,.script-textarea::placeholder{color:#ffffff80}.script-input:disabled,.script-select:disabled,.script-textarea:disabled{opacity:.6;cursor:not-allowed}.script-checkbox{display:flex;align-items:center;cursor:pointer;position:relative}.script-checkbox input[type=checkbox]{opacity:0;position:absolute;width:0;height:0}.checkmark{width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-radius:4px;background:#ffffff1a;position:relative;transition:all .2s ease}.script-checkbox input[type=checkbox]:checked+.checkmark{background:#2196f3;border-color:#2196f3}.script-checkbox input[type=checkbox]:checked+.checkmark:after{content:"";position:absolute;left:6px;top:2px;width:6px;height:10px;border:solid white;border-width:0 2px 2px 0;transform:rotate(45deg)}.parameter-description{font-size:.8rem;color:#fff9;margin:8px 0 0;line-height:1.4}.script-actions{margin-top:24px;display:flex;justify-content:flex-end}.execute-button,.stop-button{padding:12px 24px;border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s ease}.execute-button{background:linear-gradient(135deg,#4caf50,#45a049);color:#fff}.execute-button:hover{background:linear-gradient(135deg,#45a049,#3d8b40);transform:translateY(-1px)}.stop-button{background:linear-gradient(135deg,#f44336,#d32f2f);color:#fff}.stop-button:hover{background:linear-gradient(135deg,#d32f2f,#b71c1c);transform:translateY(-1px)}@media (max-width: 768px){.script-header{padding:16px;flex-direction:column;align-items:flex-start;gap:12px}.script-controls{margin-left:0;width:100%;justify-content:space-between}.script-body{padding:0 16px 16px}.progress-container{min-width:auto;flex:1}.progress-bar{flex:1;min-width:60px}}.log-panel{height:100%;width:100%;display:flex;flex-direction:column;background:#00000080;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-radius:12px;border:1px solid rgba(255,255,255,.3);overflow:hidden;box-sizing:border-box}.log-header{padding:20px;border-bottom:1px solid rgba(255,255,255,.2);display:flex;justify-content:space-between;align-items:center;background:#0000004d}.log-header h3{font-size:1.2rem;font-weight:600;margin:0;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)}.log-controls{display:flex;align-items:center;gap:12px}.log-count{font-size:.9rem;color:#ffffffb3;padding:4px 8px;background:#ffffff1a;border-radius:12px}.clear-button{padding:8px 12px;border:none;border-radius:6px;background:#f4433633;color:#f44336;font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s ease;border:1px solid rgba(244,67,54,.3)}.clear-button:hover{background:#f443364d;transform:translateY(-1px)}.log-container{flex:1;overflow-y:auto;padding:0}.log-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#fff9;text-align:center;padding:40px 20px}.empty-icon{font-size:3rem;margin-bottom:16px;opacity:.7}.log-empty p{font-size:1.1rem;font-weight:500;margin:0 0 8px;color:#fffc}.log-empty span{font-size:.9rem;color:#ffffff80}.log-list{padding:12px 0}.log-entry{padding:12px 20px;border-left:3px solid transparent;transition:all .2s ease;animation:slideIn .3s ease}@keyframes slideIn{0%{opacity:0;transform:translate(-10px)}to{opacity:1;transform:translate(0)}}.log-entry:hover{background:#ffffff0d}.log-entry.info{border-left-color:#2196f3}.log-entry.warn{border-left-color:#ff9800}.log-entry.error{border-left-color:#f44336}.log-entry.success{border-left-color:#4caf50}.log-meta{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:.8rem}.log-icon{font-size:1rem;line-height:1}.log-time{color:#fff9;font-family:Courier New,monospace;font-weight:500}.log-script{color:#ffffff80;background:#ffffff1a;padding:2px 6px;border-radius:4px;font-size:.7rem;font-weight:500}.log-message{color:#fffffff2;font-size:.9rem;line-height:1.4;word-break:break-word;margin-left:24px;text-shadow:0 1px 2px rgba(0,0,0,.3)}.log-entry.error .log-message{color:#ffcdd2}.log-entry.warn .log-message{color:#ffe0b2}.log-entry.success .log-message{color:#c8e6c9}.log-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);background:#ffffff0d}.log-legend{display:flex;gap:16px;justify-content:center}.legend-item{display:flex;align-items:center;gap:4px;font-size:.8rem;color:#fff9}.legend-icon{font-size:.9rem}.log-container::-webkit-scrollbar{width:6px}.log-container::-webkit-scrollbar-track{background:#ffffff1a}.log-container::-webkit-scrollbar-thumb{background:#ffffff4d;border-radius:3px}.log-container::-webkit-scrollbar-thumb:hover{background:#ffffff80}@media (max-width: 768px){.log-header{padding:16px;flex-direction:column;align-items:flex-start;gap:12px}.log-controls{width:100%;justify-content:space-between}.log-entry{padding:10px 16px}.log-message{margin-left:20px;font-size:.85rem}.log-legend{flex-wrap:wrap;gap:12px}.log-footer{padding:12px 16px}}.resize-handle{width:8px;height:100%;cursor:col-resize;position:relative;display:flex;align-items:center;justify-content:center;background:transparent;transition:all .2s ease;-webkit-user-select:none;user-select:none;flex-shrink:0}.resize-handle:hover{background:#ffffff1a}.resize-handle--dragging{background:#fff3}.resize-handle-line{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#fff3;transform:translate(-50%);transition:all .2s ease}.resize-handle:hover .resize-handle-line{background:#fff6;width:2px}.resize-handle--dragging .resize-handle-line{background:#fff9;width:2px}.resize-handle-grip{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:4px;height:24px;display:flex;flex-direction:column;justify-content:space-between;align-items:center;opacity:0;transition:opacity .2s ease}.resize-handle:hover .resize-handle-grip,.resize-handle--dragging .resize-handle-grip{opacity:1}.resize-handle-dot{width:2px;height:2px;background:#fff9;border-radius:50%;flex-shrink:0}.resize-handle:hover .resize-handle-dot{background:#fffc}.resize-handle--dragging .resize-handle-dot{background:#fff}body.resizing,body.resizing *{cursor:col-resize!important;-webkit-user-select:none!important;user-select:none!important}@media (max-width: 1024px){.resize-handle{display:none}}@media (prefers-contrast: high){.resize-handle-line{background:#fffc}.resize-handle:hover .resize-handle-line{background:#fff}.resize-handle-dot{background:#ffffffe6}}@media (prefers-reduced-motion: reduce){.resize-handle,.resize-handle-line,.resize-handle-grip{transition:none}}.script-manager{width:100%;height:100%;display:flex;flex-direction:column;color:#fff;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif}.script-manager-header{padding:20px 24px 24px;text-align:center;background:#ffffff0d;border-bottom:1px solid rgba(255,255,255,.1);margin-top:0}.script-manager-header h1{font-size:1.8rem;font-weight:700;margin:0 0 8px;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.8),0 1px 2px rgba(0,0,0,.6),0 0 8px rgba(102,126,234,.3);line-height:1.2}.script-manager-header p{font-size:1rem;margin:0 0 20px;color:#ffffffe6;text-shadow:0 1px 2px rgba(0,0,0,.5)}.script-manager-header p a{color:#87ceeb;text-decoration:none;transition:all .2s ease;text-shadow:0 1px 2px rgba(0,0,0,.5)}.script-manager-header p a:hover{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5),0 0 8px rgba(135,206,235,.6);text-decoration:underline}.status-bar{display:flex;justify-content:center;gap:24px;flex-wrap:wrap}.status-item{display:flex;align-items:center;gap:8px;padding:8px 16px;background:#ffffff1a;border-radius:20px;border:1px solid rgba(255,255,255,.2)}.status-label{font-size:.9rem;color:#ffffffb3}.status-value{font-size:.9rem;font-weight:600;color:#fff;background:#fff3;padding:2px 8px;border-radius:12px;min-width:24px;text-align:center}.status-value.running{background:linear-gradient(135deg,#4caf50,#45a049);color:#fff;animation:pulse 2s infinite}@keyframes pulse{0%,to{opacity:1}50%{opacity:.7}}.script-manager-content{flex:1;display:flex;gap:24px;padding:24px;min-height:0}.scripts-panel{flex-shrink:0;overflow-y:auto;padding-right:12px;box-sizing:border-box}.scripts-section{margin-bottom:32px}.scripts-section:last-child{margin-bottom:0}.scripts-section h2{font-size:1.3rem;font-weight:600;margin:0 0 20px;color:#fff;display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:2px solid rgba(255,255,255,.1)}.scripts-list{display:flex;flex-direction:column;gap:16px}.logs-panel{flex-shrink:0;display:flex;flex-direction:column;box-sizing:border-box}.scripts-panel::-webkit-scrollbar{width:8px}.scripts-panel::-webkit-scrollbar-track{background:#ffffff1a;border-radius:4px}.scripts-panel::-webkit-scrollbar-thumb{background:#ffffff4d;border-radius:4px}.scripts-panel::-webkit-scrollbar-thumb:hover{background:#ffffff80}@media (max-width: 1200px){.scripts-panel{width:400px!important;min-width:350px}.logs-panel{width:auto!important;flex:1;min-width:450px}}@media (max-width: 1024px){.script-manager-content{flex-direction:column;gap:20px}.scripts-panel{width:100%!important;min-width:auto;max-width:none;padding-right:0}.logs-panel{width:100%!important;min-width:auto;height:400px;min-height:300px}}@media (max-width: 768px){.script-manager-content{padding:16px;gap:16px}.script-manager-header{padding:20px 16px}.script-manager-header h1{font-size:1.6rem}.status-bar{gap:16px}.status-item{padding:6px 12px}.scripts-section h2{font-size:1.2rem}.logs-panel{height:350px;min-height:250px}}@media (max-width: 480px){.script-manager-header h1{font-size:1.4rem}.script-manager-header p{font-size:.9rem}.status-bar{flex-direction:column;align-items:center;gap:12px}.status-item{width:100%;max-width:200px;justify-content:space-between}.logs-panel{height:300px;min-height:200px}}.script-manager.loading{opacity:.7;pointer-events:none}.script-manager.loading:after{content:"";position:absolute;top:50%;left:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border:3px solid rgba(255,255,255,.3);border-top:3px solid white;border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{0%{transform:rotate(0)}to{transform:rotate(360deg)}}.scripts-list:empty:after{content:"\u6682\u65E0\u811A\u672C";display:block;text-align:center;color:#ffffff80;font-style:italic;padding:40px 20px;background:#ffffff0d;border-radius:8px;border:1px dashed rgba(255,255,255,.2)}.task-panel{width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden}.task-panel-header{text-align:center;margin-bottom:40px}.task-panel-header h1{font-size:2.5rem;font-weight:700;margin:0 0 16px;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.3)}.task-panel-header p{font-size:1.1rem;margin:0;color:#fffc;font-weight:400}.task-panel-content{flex:1;display:flex;flex-direction:column;gap:40px}.counter-section{background:#ffffff1a;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-radius:16px;padding:32px;text-align:center;border:1px solid rgba(255,255,255,.2)}.counter-section h2{font-size:1.5rem;font-weight:600;margin:0 0 24px;color:#fff}.counter-display{margin-bottom:24px}.counter-value{font-size:4rem;font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.3);display:inline-block;min-width:120px}.counter-controls{display:flex;gap:16px;justify-content:center;align-items:center}.counter-button{width:48px;height:48px;border-radius:50%;border:none;font-size:1.2rem;font-weight:600;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;justify-content:center;outline:none}.counter-button--decrease{background:#ff6b6be6;color:#fff}.counter-button--decrease:hover{background:#ff6b6b;transform:scale(1.05)}.counter-button--reset{background:#fff3;color:#fff;width:auto;padding:0 20px;border-radius:24px;font-size:.9rem}.counter-button--reset:hover{background:#ffffff4d;transform:scale(1.05)}.counter-button--increase{background:#6bff6be6;color:#fff}.counter-button--increase:hover{background:#6bff6b;transform:scale(1.05)}.counter-button:active{transform:scale(.95)}.counter-button:focus-visible{outline:2px solid rgba(255,255,255,.8);outline-offset:2px}.placeholder-section{background:#ffffff1a;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-radius:16px;padding:32px;border:1px solid rgba(255,255,255,.2)}.placeholder-section h2{font-size:1.5rem;font-weight:600;margin:0 0 24px;color:#fff;text-align:center}.feature-list{display:flex;flex-direction:column;gap:20px}.feature-item{display:flex;align-items:center;gap:16px;padding:16px;background:#ffffff0d;border-radius:12px;border:1px solid rgba(255,255,255,.1);transition:all .2s ease}.feature-item:hover{background:#ffffff1a;transform:translateY(-2px)}.feature-icon{font-size:2rem;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#ffffff1a;border-radius:12px;flex-shrink:0}.feature-text h3{font-size:1.1rem;font-weight:600;margin:0 0 4px;color:#fff}.feature-text p{font-size:.9rem;margin:0;color:#ffffffb3}@media (max-width: 768px){.task-panel-header h1{font-size:2rem}.task-panel-content{gap:24px}.counter-section,.placeholder-section{padding:24px}.counter-value{font-size:3rem}.counter-controls{gap:12px}.counter-button{width:40px;height:40px;font-size:1rem}.feature-list{gap:16px}.feature-item{padding:12px}.feature-icon{font-size:1.5rem;width:40px;height:40px}} ');
+(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(' .floating-button{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px #00000026,0 2px 6px #0000001a;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:9999;font-family:inherit;outline:none}.floating-button:hover{transform:translateY(-2px);box-shadow:0 6px 16px #0003,0 3px 8px #00000026;background:linear-gradient(135deg,#5a6fd8,#6a4190)}.floating-button:active{transform:translateY(0);box-shadow:0 2px 8px #0003,0 1px 4px #0000001a}.floating-button:focus-visible{outline:2px solid #667eea;outline-offset:2px}.floating-button svg{width:24px;height:24px;transition:transform .2s ease}.floating-button:hover svg{transform:scale(1.1)}.floating-button *{box-sizing:border-box}@media (max-width: 768px){.floating-button{bottom:16px;right:16px;width:48px;height:48px}.floating-button svg{width:20px;height:20px}}.modal-backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background-color:#0009;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);z-index:10000;display:flex;align-items:center;justify-content:center;animation:modal-fade-in .3s cubic-bezier(.4,0,.2,1)}.modal-backdrop--closing{animation:modal-fade-out .3s cubic-bezier(.4,0,.2,1)}.modal-content{position:relative;width:100%;height:100%;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:0;box-shadow:0 20px 40px #0000004d;display:flex;flex-direction:column;animation:modal-slide-up .3s cubic-bezier(.4,0,.2,1);overflow:hidden}.modal-content--closing{animation:modal-slide-down .3s cubic-bezier(.4,0,.2,1)}.modal-header{position:absolute;top:20px;right:20px;z-index:10001}.modal-close-button{width:48px;height:48px;border-radius:50%;border:none;background:#fff3;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease;outline:none;padding:0;box-sizing:border-box}.modal-close-button:hover{background:#ffffff4d;transform:translateY(2px)}.modal-close-button:active{transform:translateY(0);background:#fff6}.modal-close-button:focus-visible{outline:2px solid rgba(255,255,255,.8);outline-offset:2px}.modal-close-button svg{width:24px;height:24px;transition:transform .2s ease;display:block;flex-shrink:0}.modal-body{flex:1;padding:80px 40px 40px;overflow-y:auto;color:#fff}@keyframes modal-fade-in{0%{opacity:0}to{opacity:1}}@keyframes modal-fade-out{0%{opacity:1}to{opacity:0}}@keyframes modal-slide-up{0%{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes modal-slide-down{0%{transform:translateY(0)}to{transform:translateY(100%)}}.modal-backdrop *,.modal-content *,.modal-header *,.modal-body *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif}@media (max-width: 768px){.modal-header{top:16px;right:16px}.modal-close-button{width:40px;height:40px}.modal-close-button svg{width:20px;height:20px}.modal-body{padding:60px 20px 20px}}.script-card{background:#0006;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-radius:12px;border:1px solid rgba(255,255,255,.3);margin-bottom:16px;transition:all .3s ease;overflow:hidden}.script-card:hover{background:#00000080;border-color:#fff6;transform:translateY(-2px)}.script-card.running{border-color:#4caf50;box-shadow:0 0 20px #4caf504d}.script-header{padding:20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;-webkit-user-select:none;user-select:none}.script-info{flex:1;min-width:0}.script-name{font-size:1.2rem;font-weight:600;margin:0 0 8px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)}.script-description{font-size:.9rem;margin:0 0 12px;color:#fffffff2;line-height:1.4;text-shadow:0 1px 2px rgba(0,0,0,.3)}.script-category{display:inline-block;padding:4px 12px;border-radius:16px;font-size:.8rem;font-weight:500;text-transform:uppercase;letter-spacing:.5px}.script-category.tool{background:#2196f333;color:#2196f3;border:1px solid rgba(33,150,243,.3)}.script-category.operation{background:#ff980033;color:#ff9800;border:1px solid rgba(255,152,0,.3)}.script-controls{display:flex;align-items:center;gap:12px;margin-left:20px}.progress-container{display:flex;align-items:center;gap:8px;min-width:120px}.progress-bar{width:80px;height:6px;background:#fff3;border-radius:3px;overflow:hidden}.progress-fill{height:100%;background:linear-gradient(90deg,#4caf50,#8bc34a);border-radius:3px;transition:width .3s ease}.progress-text{font-size:.8rem;color:#fffc;font-weight:500;min-width:32px}.expand-button{width:32px;height:32px;border:none;background:#ffffff1a;border-radius:50%;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease}.expand-button:hover{background:#fff3}.expand-button.expanded{transform:rotate(180deg)}.script-body{padding:0 20px 20px;border-top:1px solid rgba(255,255,255,.2);animation:slideDown .3s ease;background:#0003}@keyframes slideDown{0%{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}.script-parameters{margin-top:10px;padding-top:16px}.parameter-group{margin-bottom:20px}.parameter-label{display:block;font-size:.9rem;font-weight:500;margin-bottom:8px;color:#fffffff2;text-shadow:0 1px 2px rgba(0,0,0,.3)}.parameter-label .required{color:#f44336;margin-left:4px}.script-input,.script-select,.script-textarea{width:100%;padding:12px;border:1px solid rgba(255,255,255,.3);border-radius:8px;background:#0000004d;color:#fff;font-size:.9rem;transition:all .2s ease;text-shadow:0 1px 2px rgba(0,0,0,.3)}.script-input:focus,.script-select:focus,.script-textarea:focus{outline:none;border-color:#2196f3;background:#ffffff26}.script-input::placeholder,.script-textarea::placeholder{color:#ffffff80}.script-input:disabled,.script-select:disabled,.script-textarea:disabled{opacity:.6;cursor:not-allowed}.script-checkbox{display:flex;align-items:center;cursor:pointer;position:relative}.script-checkbox input[type=checkbox]{opacity:0;position:absolute;width:0;height:0}.checkmark{width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-radius:4px;background:#ffffff1a;position:relative;transition:all .2s ease}.script-checkbox input[type=checkbox]:checked+.checkmark{background:#2196f3;border-color:#2196f3}.script-checkbox input[type=checkbox]:checked+.checkmark:after{content:"";position:absolute;left:6px;top:2px;width:6px;height:10px;border:solid white;border-width:0 2px 2px 0;transform:rotate(45deg)}.parameter-description{font-size:.8rem;color:#fff9;margin:8px 0 0;line-height:1.4}.favorite-selector{position:relative}.favorite-input-wrapper{position:relative;display:flex;align-items:center}.favorite-input{width:100%;padding-right:36px}.favorite-clear-button{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;border:none;background:#ffffff1a;color:#fff9;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease;z-index:1}.favorite-clear-button:hover{background:#fff3;color:#ffffffe6;transform:translateY(-50%) scale(1.1)}.favorite-clear-button:active{transform:translateY(-50%) scale(.95);background:#ffffff4d}.favorite-clear-button svg{width:14px;height:14px;display:block}.input-wrapper{position:relative;display:flex;align-items:center}.input-wrapper .script-input{width:100%;padding-right:36px}.textarea-wrapper{position:relative}.textarea-wrapper .script-textarea{width:100%;padding-right:36px}.script-card .clear-button{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;border:none;background:#ffffff26;color:#fffc;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease;z-index:2;box-sizing:border-box}.script-card .clear-button:hover{background:#ffffff40;color:#fff;transform:translateY(-50%) scale(1.1)}.script-card .clear-button:active{transform:translateY(-50%) scale(.95);background:#ffffff59}.script-card .clear-button svg{width:16px;height:16px;display:block;flex-shrink:0;pointer-events:none}.script-card .clear-button svg path{stroke:currentColor}.script-card .clear-button:before{content:"\xD7";font-size:16px;font-weight:700;line-height:1;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:none}.script-card .clear-button:not(:has(svg)){font-size:16px;font-weight:700;line-height:1}.script-card .clear-button:not(:has(svg)):before{display:block}.script-card .clear-button-textarea{top:12px;transform:none}.script-card .clear-button-textarea:hover{transform:scale(1.1)}.script-card .clear-button-textarea:active{transform:scale(.95)}.script-card .clear-button-textarea svg{width:16px;height:16px;display:block;flex-shrink:0;pointer-events:none}.favorite-loading,.favorite-error{margin-top:8px;padding:8px 12px;border-radius:6px;font-size:.8rem;line-height:1.4}.favorite-loading{background:#2196f333;color:#2196f3;border:1px solid rgba(33,150,243,.3)}.favorite-error{background:#f4433633;color:#f44336;border:1px solid rgba(244,67,54,.3);display:flex;align-items:center;justify-content:space-between;gap:8px}.retry-button{padding:4px 8px;border:none;border-radius:4px;background:#f443364d;color:#f44336;font-size:.7rem;cursor:pointer;transition:all .2s ease;flex-shrink:0}.retry-button:hover{background:#f4433666;transform:translateY(-1px)}.retry-button:disabled{opacity:.6;cursor:not-allowed;transform:none}.script-actions{margin-top:24px;display:flex;justify-content:flex-end}.execute-button,.stop-button{padding:12px 24px;border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s ease}.execute-button{background:linear-gradient(135deg,#4caf50,#45a049);color:#fff}.execute-button:hover{background:linear-gradient(135deg,#45a049,#3d8b40);transform:translateY(-1px)}.stop-button{background:linear-gradient(135deg,#f44336,#d32f2f);color:#fff}.stop-button:hover{background:linear-gradient(135deg,#d32f2f,#b71c1c);transform:translateY(-1px)}@media (max-width: 768px){.script-header{padding:16px;flex-direction:column;align-items:flex-start;gap:12px}.script-controls{margin-left:0;width:100%;justify-content:space-between}.script-body{padding:0 16px 16px}.progress-container{min-width:auto;flex:1}.progress-bar{flex:1;min-width:60px}}.log-panel{height:100%;width:100%;display:flex;flex-direction:column;background:#00000080;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-radius:12px;border:1px solid rgba(255,255,255,.3);overflow:hidden;box-sizing:border-box}.log-header{padding:20px;border-bottom:1px solid rgba(255,255,255,.2);display:flex;justify-content:space-between;align-items:center;background:#0000004d}.log-header h3{font-size:1.2rem;font-weight:600;margin:0;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)}.log-controls{display:flex;align-items:center;gap:12px}.log-count{font-size:.9rem;color:#ffffffb3;padding:4px 8px;background:#ffffff1a;border-radius:12px}.log-clear-button{padding:8px 12px;border:none;border-radius:6px;background:#f4433633;color:#f44336;font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s ease;border:1px solid rgba(244,67,54,.3)}.log-clear-button:hover{background:#f443364d;transform:translateY(-1px)}.log-container{flex:1;overflow-y:auto;padding:0}.log-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#fff9;text-align:center;padding:40px 20px}.empty-icon{font-size:3rem;margin-bottom:16px;opacity:.7}.log-empty p{font-size:1.1rem;font-weight:500;margin:0 0 8px;color:#fffc}.log-empty span{font-size:.9rem;color:#ffffff80}.log-list{padding:12px 0}.log-entry{padding:12px 20px;border-left:3px solid transparent;transition:all .2s ease;animation:slideIn .3s ease}@keyframes slideIn{0%{opacity:0;transform:translate(-10px)}to{opacity:1;transform:translate(0)}}.log-entry:hover{background:#ffffff0d}.log-entry.info{border-left-color:#2196f3}.log-entry.warn{border-left-color:#ff9800}.log-entry.error{border-left-color:#f44336}.log-entry.success{border-left-color:#4caf50}.log-entry.debug{border-left-color:#9c27b0}.log-meta{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:.8rem}.log-icon{font-size:1rem;line-height:1}.log-time{color:#fff9;font-family:Courier New,monospace;font-weight:500}.log-script{color:#ffffff80;background:#ffffff1a;padding:2px 6px;border-radius:4px;font-size:.7rem;font-weight:500}.log-message{color:#fffffff2;font-size:.9rem;line-height:1.4;word-break:break-word;margin-left:24px;text-shadow:0 1px 2px rgba(0,0,0,.3);white-space:pre-line}.log-entry.error .log-message{color:#ffcdd2}.log-entry.warn .log-message{color:#ffe0b2}.log-entry.success .log-message{color:#c8e6c9}.log-entry.debug .log-message{color:#e1bee7}.log-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);background:#ffffff0d}.log-filters{display:flex;justify-content:center;flex-wrap:wrap}.filter-buttons{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.filter-button{display:flex;align-items:center;gap:4px;padding:6px 10px;border:2px solid transparent;border-radius:4px;background:#ffffff1a;color:#fff9;font-size:.8rem;cursor:pointer;transition:all .2s ease;-webkit-user-select:none;user-select:none}.filter-button:hover{background:#ffffff26;color:#fffc}.filter-button.active{color:#fff;background:#ffffff1a}.filter-button.info.active{border-color:#2196f3;background:#2196f333}.filter-button.success.active{border-color:#4caf50;background:#4caf5033}.filter-button.warn.active{border-color:#ff9800;background:#ff980033}.filter-button.error.active{border-color:#f44336;background:#f4433633}.filter-button.debug.active{border-color:#9c27b0;background:#9c27b033}.filter-icon{font-size:.9rem}.log-container::-webkit-scrollbar{width:6px}.log-container::-webkit-scrollbar-track{background:#ffffff1a}.log-container::-webkit-scrollbar-thumb{background:#ffffff4d;border-radius:3px}.log-container::-webkit-scrollbar-thumb:hover{background:#ffffff80}@media (max-width: 768px){.log-header{padding:16px;flex-direction:column;align-items:flex-start;gap:12px}.log-controls{width:100%;justify-content:space-between}.log-entry{padding:10px 16px}.log-message{margin-left:20px;font-size:.85rem}.log-filters{flex-direction:column;align-items:flex-start;gap:8px}.filter-buttons{gap:6px}.filter-button{font-size:.75rem;padding:4px 8px}.log-footer{padding:12px 16px}}.resize-handle{width:8px;height:100%;cursor:col-resize;position:relative;display:flex;align-items:center;justify-content:center;background:transparent;transition:all .2s ease;-webkit-user-select:none;user-select:none;flex-shrink:0}.resize-handle:hover{background:#ffffff1a}.resize-handle--dragging{background:#fff3}.resize-handle-line{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#fff3;transform:translate(-50%);transition:all .2s ease}.resize-handle:hover .resize-handle-line{background:#fff6;width:2px}.resize-handle--dragging .resize-handle-line{background:#fff9;width:2px}.resize-handle-grip{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:4px;height:24px;display:flex;flex-direction:column;justify-content:space-between;align-items:center;opacity:0;transition:opacity .2s ease}.resize-handle:hover .resize-handle-grip,.resize-handle--dragging .resize-handle-grip{opacity:1}.resize-handle-dot{width:2px;height:2px;background:#fff9;border-radius:50%;flex-shrink:0}.resize-handle:hover .resize-handle-dot{background:#fffc}.resize-handle--dragging .resize-handle-dot{background:#fff}body.resizing,body.resizing *{cursor:col-resize!important;-webkit-user-select:none!important;user-select:none!important}@media (max-width: 1024px){.resize-handle{display:none}}@media (prefers-contrast: high){.resize-handle-line{background:#fffc}.resize-handle:hover .resize-handle-line{background:#fff}.resize-handle-dot{background:#ffffffe6}}@media (prefers-reduced-motion: reduce){.resize-handle,.resize-handle-line,.resize-handle-grip{transition:none}}.script-manager{width:100%;height:100%;display:flex;flex-direction:column;color:#fff;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif}.script-manager-header{padding:20px 24px 24px;text-align:center;background:#ffffff0d;border-bottom:1px solid rgba(255,255,255,.1);margin-top:0}.script-manager-header h1{font-size:1.8rem;font-weight:700;margin:0 0 8px;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.8),0 1px 2px rgba(0,0,0,.6),0 0 8px rgba(102,126,234,.3);line-height:1.2}.script-manager-header p{font-size:1rem;margin:0 0 20px;color:#ffffffe6;text-shadow:0 1px 2px rgba(0,0,0,.5)}.script-manager-header p a{color:#87ceeb;text-decoration:none;transition:all .2s ease;text-shadow:0 1px 2px rgba(0,0,0,.5)}.script-manager-header p a:hover{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5),0 0 8px rgba(135,206,235,.6);text-decoration:underline}.status-bar{display:flex;justify-content:center;gap:24px;flex-wrap:wrap}.status-item{display:flex;align-items:center;gap:8px;padding:8px 16px;background:#ffffff1a;border-radius:20px;border:1px solid rgba(255,255,255,.2)}.status-label{font-size:.9rem;color:#ffffffb3}.status-value{font-size:.9rem;font-weight:600;color:#fff;background:#fff3;padding:2px 8px;border-radius:12px;min-width:24px;text-align:center}.status-value.running{background:linear-gradient(135deg,#4caf50,#45a049);color:#fff;animation:pulse 2s infinite}@keyframes pulse{0%,to{opacity:1}50%{opacity:.7}}.script-manager-content{flex:1;display:flex;gap:24px;padding:24px;min-height:0}.scripts-panel{flex-shrink:0;overflow-y:auto;padding-right:12px;box-sizing:border-box}.scripts-section{margin-bottom:32px}.scripts-section:last-child{margin-bottom:0}.scripts-section h2{font-size:1.3rem;font-weight:600;margin:0 0 20px;color:#fff;display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:2px solid rgba(255,255,255,.1)}.scripts-list{display:flex;flex-direction:column;gap:16px}.logs-panel{flex-shrink:0;display:flex;flex-direction:column;box-sizing:border-box}.scripts-panel::-webkit-scrollbar{width:8px}.scripts-panel::-webkit-scrollbar-track{background:#ffffff1a;border-radius:4px}.scripts-panel::-webkit-scrollbar-thumb{background:#ffffff4d;border-radius:4px}.scripts-panel::-webkit-scrollbar-thumb:hover{background:#ffffff80}@media (max-width: 1200px){.scripts-panel{width:400px!important;min-width:350px}.logs-panel{width:auto!important;flex:1;min-width:450px}}@media (max-width: 1024px){.script-manager-content{flex-direction:column;gap:20px}.scripts-panel{width:100%!important;min-width:auto;max-width:none;padding-right:0}.logs-panel{width:100%!important;min-width:auto;height:400px;min-height:300px}}@media (max-width: 768px){.script-manager-content{padding:16px;gap:16px}.script-manager-header{padding:20px 16px}.script-manager-header h1{font-size:1.6rem}.status-bar{gap:16px}.status-item{padding:6px 12px}.scripts-section h2{font-size:1.2rem}.logs-panel{height:350px;min-height:250px}}@media (max-width: 480px){.script-manager-header h1{font-size:1.4rem}.script-manager-header p{font-size:.9rem}.status-bar{flex-direction:column;align-items:center;gap:12px}.status-item{width:100%;max-width:200px;justify-content:space-between}.logs-panel{height:300px;min-height:200px}}.script-manager.loading{opacity:.7;pointer-events:none}.script-manager.loading:after{content:"";position:absolute;top:50%;left:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border:3px solid rgba(255,255,255,.3);border-top:3px solid white;border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{0%{transform:rotate(0)}to{transform:rotate(360deg)}}.scripts-list:empty:after{content:"\u6682\u65E0\u811A\u672C";display:block;text-align:center;color:#ffffff80;font-style:italic;padding:40px 20px;background:#ffffff0d;border-radius:8px;border:1px dashed rgba(255,255,255,.2)}.task-panel{width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden}.task-panel-header{text-align:center;margin-bottom:40px}.task-panel-header h1{font-size:2.5rem;font-weight:700;margin:0 0 16px;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.3)}.task-panel-header p{font-size:1.1rem;margin:0;color:#fffc;font-weight:400}.task-panel-content{flex:1;display:flex;flex-direction:column;gap:40px}.counter-section{background:#ffffff1a;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-radius:16px;padding:32px;text-align:center;border:1px solid rgba(255,255,255,.2)}.counter-section h2{font-size:1.5rem;font-weight:600;margin:0 0 24px;color:#fff}.counter-display{margin-bottom:24px}.counter-value{font-size:4rem;font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.3);display:inline-block;min-width:120px}.counter-controls{display:flex;gap:16px;justify-content:center;align-items:center}.counter-button{width:48px;height:48px;border-radius:50%;border:none;font-size:1.2rem;font-weight:600;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;justify-content:center;outline:none}.counter-button--decrease{background:#ff6b6be6;color:#fff}.counter-button--decrease:hover{background:#ff6b6b;transform:scale(1.05)}.counter-button--reset{background:#fff3;color:#fff;width:auto;padding:0 20px;border-radius:24px;font-size:.9rem}.counter-button--reset:hover{background:#ffffff4d;transform:scale(1.05)}.counter-button--increase{background:#6bff6be6;color:#fff}.counter-button--increase:hover{background:#6bff6b;transform:scale(1.05)}.counter-button:active{transform:scale(.95)}.counter-button:focus-visible{outline:2px solid rgba(255,255,255,.8);outline-offset:2px}.placeholder-section{background:#ffffff1a;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-radius:16px;padding:32px;border:1px solid rgba(255,255,255,.2)}.placeholder-section h2{font-size:1.5rem;font-weight:600;margin:0 0 24px;color:#fff;text-align:center}.feature-list{display:flex;flex-direction:column;gap:20px}.feature-item{display:flex;align-items:center;gap:16px;padding:16px;background:#ffffff0d;border-radius:12px;border:1px solid rgba(255,255,255,.1);transition:all .2s ease}.feature-item:hover{background:#ffffff1a;transform:translateY(-2px)}.feature-icon{font-size:2rem;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#ffffff1a;border-radius:12px;flex-shrink:0}.feature-text h3{font-size:1.1rem;font-weight:600;margin:0 0 4px;color:#fff}.feature-text p{font-size:.9rem;margin:0;color:#ffffffb3}@media (max-width: 768px){.task-panel-header h1{font-size:2rem}.task-panel-content{gap:24px}.counter-section,.placeholder-section{padding:24px}.counter-value{font-size:3rem}.counter-controls{gap:12px}.counter-button{width:40px;height:40px;font-size:1rem}.feature-list{gap:16px}.feature-item{padding:12px}.feature-icon{font-size:1.5rem;width:40px;height:40px}} ');
 
 (function (preact) {
   'use strict';
@@ -213,6 +215,21 @@
   }
   function Modal({ isOpen, onClose, children }) {
     const [isClosing, setIsClosing] = d(false);
+    y(() => {
+      if (isOpen) {
+        const originalOverflow = document.body.style.overflow;
+        const originalPaddingRight = document.body.style.paddingRight;
+        const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+        document.body.style.overflow = "hidden";
+        if (scrollBarWidth > 0) {
+          document.body.style.paddingRight = `${scrollBarWidth}px`;
+        }
+        return () => {
+          document.body.style.overflow = originalOverflow;
+          document.body.style.paddingRight = originalPaddingRight;
+        };
+      }
+    }, [isOpen]);
     const handleClose = () => {
       setIsClosing(true);
       setTimeout(() => {
@@ -276,10 +293,15 @@
     onExecute,
     onStop,
     isRunning,
-    progress = 0
+    progress = 0,
+    favoriteList,
+    favoriteListLoading = false,
+    favoriteListError,
+    onRetryFavoriteList
   }) {
     const [parameters, setParameters] = d({});
     const [isExpanded, setIsExpanded] = d(false);
+    const [focusedFavoriteInputs, setFocusedFavoriteInputs] = d(/* @__PURE__ */ new Set());
     y(() => {
       const storageKey = `bili_tasks_params_${script.id}`;
       const savedParams = _GM_getValue(storageKey, "{}");
@@ -322,41 +344,168 @@
     const handleStop = () => {
       onStop(script.id);
     };
+    const isFavoriteIdParameter = (param) => {
+      return param.type === "number" && (param.label.includes("收藏夹ID") || param.key.toLowerCase().includes("favorite"));
+    };
+    const getFavoriteOptions = () => {
+      if (!(favoriteList == null ? void 0 : favoriteList.list)) return [];
+      return favoriteList.list.map((fav) => ({
+        value: `${fav.title}(${fav.id})`,
+        // value设置为显示格式
+        id: fav.id,
+        // 保留原始ID用于提取
+        title: fav.title
+      })).sort((a2, b) => a2.value.localeCompare(b.value));
+    };
+    const getFavoriteTitleById = (id) => {
+      if (!(favoriteList == null ? void 0 : favoriteList.list)) return null;
+      const favorite = favoriteList.list.find((fav) => fav.id === id);
+      return favorite ? favorite.title : null;
+    };
+    const formatDisplayValue = (value) => {
+      if (!value) return "";
+      const title = getFavoriteTitleById(value);
+      return title ? `${title}(${value})` : value.toString();
+    };
+    const extractIdFromFormattedValue = (formattedValue) => {
+      const directNumber = parseInt(formattedValue);
+      if (!isNaN(directNumber) && directNumber.toString() === formattedValue) {
+        return directNumber;
+      }
+      const match = formattedValue.match(/\((\d+)\)$/);
+      if (match) {
+        return parseInt(match[1]);
+      }
+      return null;
+    };
+    const handleFavoriteInputFocus = (paramKey) => {
+      setFocusedFavoriteInputs((prev) => new Set(prev).add(paramKey));
+    };
+    const handleFavoriteInputBlur = (paramKey) => {
+      setFocusedFavoriteInputs((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(paramKey);
+        return newSet;
+      });
+    };
+    const getFavoriteInputDisplayValue = (paramKey, value) => {
+      const isFocused = focusedFavoriteInputs.has(paramKey);
+      if (isFocused || value === void 0 || value === null) {
+        return value !== void 0 && value !== null ? value.toString() : "";
+      }
+      return formatDisplayValue(value);
+    };
+    const renderClearButton = (paramKey, hasValue, className = "") => {
+      if (!hasValue || isRunning) return null;
+      return /* @__PURE__ */ u$1(
+        "button",
+        {
+          type: "button",
+          class: `clear-button ${className}`,
+          onClick: () => handleParameterChange(paramKey, ""),
+          title: "清空内容",
+          "aria-label": "清空内容",
+          children: /* @__PURE__ */ u$1("svg", { width: "16", height: "16", viewBox: "0 0 16 16", fill: "none", xmlns: "http://www.w3.org/2000/svg", children: /* @__PURE__ */ u$1(
+            "path",
+            {
+              d: "M12 4L4 12M4 4L12 12",
+              stroke: "currentColor",
+              "stroke-width": "1.5",
+              "stroke-linecap": "round",
+              "stroke-linejoin": "round"
+            }
+          ) })
+        }
+      );
+    };
     const renderParameterInput = (param) => {
       var _a;
       const value = parameters[param.key];
       switch (param.type) {
         case "text":
-          return /* @__PURE__ */ u$1(
-            "input",
-            {
-              type: "text",
-              value: value || "",
-              onChange: (e2) => handleParameterChange(param.key, e2.target.value),
-              placeholder: param.placeholder,
-              disabled: isRunning,
-              class: "script-input"
-            }
-          );
+          return /* @__PURE__ */ u$1("div", { class: "input-wrapper", children: [
+            /* @__PURE__ */ u$1(
+              "input",
+              {
+                type: "text",
+                value: value !== void 0 && value !== null ? value.toString() : "",
+                onChange: (e2) => handleParameterChange(param.key, e2.target.value),
+                placeholder: param.placeholder,
+                disabled: isRunning,
+                class: "script-input"
+              }
+            ),
+            renderClearButton(param.key, value !== void 0 && value !== null && value !== "" && value.toString().trim() !== "")
+          ] });
         case "number":
-          return /* @__PURE__ */ u$1(
-            "input",
-            {
-              type: "number",
-              value: value || "",
-              onChange: (e2) => handleParameterChange(param.key, Number(e2.target.value)),
-              placeholder: param.placeholder,
-              disabled: isRunning,
-              class: "script-input"
-            }
-          );
+          if (isFavoriteIdParameter(param)) {
+            const favoriteOptions = getFavoriteOptions();
+            const displayValue = getFavoriteInputDisplayValue(param.key, value);
+            return /* @__PURE__ */ u$1("div", { class: "favorite-selector", children: [
+              /* @__PURE__ */ u$1("div", { class: "favorite-input-wrapper", children: [
+                /* @__PURE__ */ u$1(
+                  "input",
+                  {
+                    type: "text",
+                    value: displayValue,
+                    onChange: (e2) => {
+                      const inputValue = e2.target.value;
+                      const extractedId = extractIdFromFormattedValue(inputValue);
+                      if (extractedId !== null) {
+                        handleParameterChange(param.key, extractedId);
+                      }
+                    },
+                    onFocus: () => handleFavoriteInputFocus(param.key),
+                    onBlur: () => handleFavoriteInputBlur(param.key),
+                    placeholder: param.placeholder || "输入收藏夹ID或从下拉列表选择",
+                    disabled: isRunning,
+                    class: "script-input favorite-input",
+                    list: `favorites-${script.id}-${param.key}`
+                  }
+                ),
+                renderClearButton(param.key, value !== void 0 && value !== null && value !== "", "clear-button-favorite")
+              ] }),
+              /* @__PURE__ */ u$1("datalist", { id: `favorites-${script.id}-${param.key}`, children: favoriteOptions.map((option) => /* @__PURE__ */ u$1("option", { value: option.value }, option.id)) }),
+              favoriteListLoading && /* @__PURE__ */ u$1("div", { class: "favorite-loading", children: /* @__PURE__ */ u$1("span", { children: "正在加载收藏夹列表..." }) }),
+              favoriteListError && /* @__PURE__ */ u$1("div", { class: "favorite-error", children: [
+                /* @__PURE__ */ u$1("span", { children: [
+                  "加载失败: ",
+                  favoriteListError
+                ] }),
+                onRetryFavoriteList && /* @__PURE__ */ u$1(
+                  "button",
+                  {
+                    type: "button",
+                    class: "retry-button",
+                    onClick: onRetryFavoriteList,
+                    disabled: isRunning,
+                    children: "重试"
+                  }
+                )
+              ] })
+            ] });
+          }
+          return /* @__PURE__ */ u$1("div", { class: "input-wrapper", children: [
+            /* @__PURE__ */ u$1(
+              "input",
+              {
+                type: "number",
+                value: value !== void 0 && value !== null ? value.toString() : "",
+                onChange: (e2) => handleParameterChange(param.key, Number(e2.target.value)),
+                placeholder: param.placeholder,
+                disabled: isRunning,
+                class: "script-input"
+              }
+            ),
+            renderClearButton(param.key, value !== void 0 && value !== null && value !== "")
+          ] });
         case "boolean":
           return /* @__PURE__ */ u$1("label", { class: "script-checkbox", children: [
             /* @__PURE__ */ u$1(
               "input",
               {
                 type: "checkbox",
-                checked: value || false,
+                checked: value === true,
                 onChange: (e2) => handleParameterChange(param.key, e2.target.checked),
                 disabled: isRunning
               }
@@ -378,17 +527,20 @@
             }
           );
         case "textarea":
-          return /* @__PURE__ */ u$1(
-            "textarea",
-            {
-              value: value || "",
-              onChange: (e2) => handleParameterChange(param.key, e2.target.value),
-              placeholder: param.placeholder,
-              disabled: isRunning,
-              class: "script-textarea",
-              rows: 4
-            }
-          );
+          return /* @__PURE__ */ u$1("div", { class: "textarea-wrapper", children: [
+            /* @__PURE__ */ u$1(
+              "textarea",
+              {
+                value: value !== void 0 && value !== null ? value.toString() : "",
+                onChange: (e2) => handleParameterChange(param.key, e2.target.value),
+                placeholder: param.placeholder,
+                disabled: isRunning,
+                class: "script-textarea",
+                rows: 4
+              }
+            ),
+            renderClearButton(param.key, value !== void 0 && value !== null && value !== "" && value.toString().trim() !== "", "clear-button-textarea")
+          ] });
         default:
           return null;
       }
@@ -425,17 +577,14 @@
         ] })
       ] }),
       isExpanded && /* @__PURE__ */ u$1("div", { class: "script-body", children: [
-        script.parameters.length > 0 && /* @__PURE__ */ u$1("div", { class: "script-parameters", children: [
-          /* @__PURE__ */ u$1("h4", { children: "参数配置" }),
-          script.parameters.map((param) => /* @__PURE__ */ u$1("div", { class: "parameter-group", children: [
-            /* @__PURE__ */ u$1("label", { class: "parameter-label", children: [
-              param.label,
-              param.required && /* @__PURE__ */ u$1("span", { class: "required", children: "*" })
-            ] }),
-            renderParameterInput(param),
-            param.description && /* @__PURE__ */ u$1("p", { class: "parameter-description", children: param.description })
-          ] }, param.key))
-        ] }),
+        script.parameters.length > 0 && /* @__PURE__ */ u$1("div", { class: "script-parameters", children: script.parameters.map((param) => /* @__PURE__ */ u$1("div", { class: "parameter-group", children: [
+          /* @__PURE__ */ u$1("label", { class: "parameter-label", children: [
+            param.label,
+            param.required && /* @__PURE__ */ u$1("span", { class: "required", children: "*" })
+          ] }),
+          renderParameterInput(param),
+          param.description && /* @__PURE__ */ u$1("p", { class: "parameter-description", children: param.description })
+        ] }, param.key)) }),
         /* @__PURE__ */ u$1("div", { class: "script-actions", children: isRunning ? /* @__PURE__ */ u$1(
           "button",
           {
@@ -464,11 +613,36 @@
   }
   function LogPanel({ logs, onClear }) {
     const logContainerRef = A(null);
+    const [logLevelFilters, setLogLevelFilters] = d(() => {
+      const saved = _GM_getValue("logLevelFilters", null);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+        }
+      }
+      return {
+        info: true,
+        success: true,
+        warn: true,
+        error: true,
+        debug: false
+      };
+    });
+    const filteredLogs = logs.filter((log) => logLevelFilters[log.level]);
+    const toggleLogLevel = (level) => {
+      const newFilters = {
+        ...logLevelFilters,
+        [level]: !logLevelFilters[level]
+      };
+      setLogLevelFilters(newFilters);
+      _GM_setValue("logLevelFilters", JSON.stringify(newFilters));
+    };
     y(() => {
       if (logContainerRef.current) {
         logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
       }
-    }, [logs]);
+    }, [filteredLogs]);
     const formatTime = (date) => {
       return date.toLocaleTimeString("zh-CN", {
         hour12: false,
@@ -487,6 +661,8 @@
           return "❌";
         case "success":
           return "✅";
+        case "debug":
+          return "🔍";
         default:
           return "ℹ️";
       }
@@ -496,13 +672,15 @@
         /* @__PURE__ */ u$1("h3", { children: "执行日志" }),
         /* @__PURE__ */ u$1("div", { class: "log-controls", children: [
           /* @__PURE__ */ u$1("span", { class: "log-count", children: [
+            filteredLogs.length,
+            "/",
             logs.length,
             " 条日志"
           ] }),
           /* @__PURE__ */ u$1(
             "button",
             {
-              class: "clear-button",
+              class: "log-clear-button",
               onClick: onClear,
               title: "清空日志",
               children: [
@@ -521,11 +699,11 @@
           )
         ] })
       ] }),
-      /* @__PURE__ */ u$1("div", { class: "log-container", ref: logContainerRef, children: logs.length === 0 ? /* @__PURE__ */ u$1("div", { class: "log-empty", children: [
+      /* @__PURE__ */ u$1("div", { class: "log-container", ref: logContainerRef, children: filteredLogs.length === 0 ? /* @__PURE__ */ u$1("div", { class: "log-empty", children: [
         /* @__PURE__ */ u$1("div", { class: "empty-icon", children: "📝" }),
-        /* @__PURE__ */ u$1("p", { children: "暂无日志" }),
-        /* @__PURE__ */ u$1("span", { children: "执行脚本后，日志将在这里显示" })
-      ] }) : /* @__PURE__ */ u$1("div", { class: "log-list", children: logs.map((log) => /* @__PURE__ */ u$1("div", { class: `log-entry ${log.level}`, children: [
+        /* @__PURE__ */ u$1("p", { children: logs.length === 0 ? "暂无日志" : "无匹配的日志" }),
+        /* @__PURE__ */ u$1("span", { children: logs.length === 0 ? "执行脚本后，日志将在这里显示" : "调整过滤条件以显示更多日志" })
+      ] }) : /* @__PURE__ */ u$1("div", { class: "log-list", children: filteredLogs.map((log) => /* @__PURE__ */ u$1("div", { class: `log-entry ${log.level}`, children: [
         /* @__PURE__ */ u$1("div", { class: "log-meta", children: [
           /* @__PURE__ */ u$1("span", { class: "log-icon", children: getLogIcon(log.level) }),
           /* @__PURE__ */ u$1("span", { class: "log-time", children: formatTime(log.timestamp) }),
@@ -537,24 +715,68 @@
         ] }),
         /* @__PURE__ */ u$1("div", { class: "log-message", children: log.message })
       ] }, log.id)) }) }),
-      /* @__PURE__ */ u$1("div", { class: "log-footer", children: /* @__PURE__ */ u$1("div", { class: "log-legend", children: [
-        /* @__PURE__ */ u$1("div", { class: "legend-item", children: [
-          /* @__PURE__ */ u$1("span", { class: "legend-icon info", children: "ℹ️" }),
-          /* @__PURE__ */ u$1("span", { children: "信息" })
-        ] }),
-        /* @__PURE__ */ u$1("div", { class: "legend-item", children: [
-          /* @__PURE__ */ u$1("span", { class: "legend-icon warn", children: "⚠️" }),
-          /* @__PURE__ */ u$1("span", { children: "警告" })
-        ] }),
-        /* @__PURE__ */ u$1("div", { class: "legend-item", children: [
-          /* @__PURE__ */ u$1("span", { class: "legend-icon error", children: "❌" }),
-          /* @__PURE__ */ u$1("span", { children: "错误" })
-        ] }),
-        /* @__PURE__ */ u$1("div", { class: "legend-item", children: [
-          /* @__PURE__ */ u$1("span", { class: "legend-icon success", children: "✅" }),
-          /* @__PURE__ */ u$1("span", { children: "成功" })
-        ] })
-      ] }) })
+      /* @__PURE__ */ u$1("div", { class: "log-footer", children: /* @__PURE__ */ u$1("div", { class: "log-filters", children: /* @__PURE__ */ u$1("div", { class: "filter-buttons", children: [
+        /* @__PURE__ */ u$1(
+          "button",
+          {
+            class: `filter-button debug ${logLevelFilters.debug ? "active" : ""}`,
+            onClick: () => toggleLogLevel("debug"),
+            title: "切换调试日志显示",
+            children: [
+              /* @__PURE__ */ u$1("span", { class: "filter-icon", children: "🔍" }),
+              /* @__PURE__ */ u$1("span", { children: "调试" })
+            ]
+          }
+        ),
+        /* @__PURE__ */ u$1(
+          "button",
+          {
+            class: `filter-button info ${logLevelFilters.info ? "active" : ""}`,
+            onClick: () => toggleLogLevel("info"),
+            title: "切换信息日志显示",
+            children: [
+              /* @__PURE__ */ u$1("span", { class: "filter-icon", children: "ℹ️" }),
+              /* @__PURE__ */ u$1("span", { children: "信息" })
+            ]
+          }
+        ),
+        /* @__PURE__ */ u$1(
+          "button",
+          {
+            class: `filter-button success ${logLevelFilters.success ? "active" : ""}`,
+            onClick: () => toggleLogLevel("success"),
+            title: "切换成功日志显示",
+            children: [
+              /* @__PURE__ */ u$1("span", { class: "filter-icon", children: "✅" }),
+              /* @__PURE__ */ u$1("span", { children: "成功" })
+            ]
+          }
+        ),
+        /* @__PURE__ */ u$1(
+          "button",
+          {
+            class: `filter-button warn ${logLevelFilters.warn ? "active" : ""}`,
+            onClick: () => toggleLogLevel("warn"),
+            title: "切换警告日志显示",
+            children: [
+              /* @__PURE__ */ u$1("span", { class: "filter-icon", children: "⚠️" }),
+              /* @__PURE__ */ u$1("span", { children: "警告" })
+            ]
+          }
+        ),
+        /* @__PURE__ */ u$1(
+          "button",
+          {
+            class: `filter-button error ${logLevelFilters.error ? "active" : ""}`,
+            onClick: () => toggleLogLevel("error"),
+            title: "切换错误日志显示",
+            children: [
+              /* @__PURE__ */ u$1("span", { class: "filter-icon", children: "❌" }),
+              /* @__PURE__ */ u$1("span", { children: "错误" })
+            ]
+          }
+        )
+      ] }) }) })
     ] });
   }
   function ResizeHandle({ onMouseDown, isDragging }) {
@@ -591,7 +813,7 @@
       }
     );
   }
-  const SCRIPT_CONFIGS = [
+  const ALL_SCRIPT_CONFIGS = [
     // 工具脚本
     {
       id: "bv2av",
@@ -698,9 +920,17 @@
           key: "maxCount",
           label: "最大添加数量",
           type: "number",
-          defaultValue: 50,
+          defaultValue: 0,
           required: false,
           description: "最多添加多少个视频，0表示全部添加"
+        },
+        {
+          key: "disableSpaceCheck",
+          label: "关闭收藏夹剩余空间检查",
+          type: "boolean",
+          defaultValue: false,
+          required: false,
+          description: "启用后将跳过收藏夹容量检查，适用于添加重复视频的场景（重复视频不占用额外空间）"
         }
       ]
     },
@@ -747,39 +977,6 @@
       ]
     },
     {
-      id: "move_single_media",
-      name: "移动单个视频",
-      description: "将指定视频从一个收藏夹移动到另一个收藏夹",
-      category: "operation",
-      isRunning: false,
-      parameters: [
-        {
-          key: "mediaId",
-          label: "视频ID",
-          type: "text",
-          defaultValue: "",
-          required: true,
-          description: "要移动的视频ID（支持BV号或AV号）"
-        },
-        {
-          key: "fromFavorite",
-          label: "源收藏夹ID",
-          type: "number",
-          defaultValue: "",
-          required: true,
-          description: "视频当前所在的收藏夹ID"
-        },
-        {
-          key: "toFavorite",
-          label: "目标收藏夹ID",
-          type: "number",
-          defaultValue: "",
-          required: true,
-          description: "要移动到的收藏夹ID"
-        }
-      ]
-    },
-    {
       id: "delete_timeout_lottery",
       name: "删除过期抽奖动态",
       description: "删除已过期的抽奖动态（仅限官方抽奖工具）",
@@ -808,14 +1005,14 @@
           type: "number",
           defaultValue: "",
           required: false,
-          description: "指定用户ID，不填则为当前登录用户"
+          description: "指定用户ID，不填则为当前登录用户。 填其他人可以扫描其他人的动态，但无法删除。"
         }
       ]
     },
     {
       id: "clear_toview",
       name: "清空稍后再看",
-      description: "删除稍后再看中的所有视频",
+      description: "由于新版「稍后再看」移除了清空按钮，特出该脚本以删除所有「稍后再看」的视频。",
       category: "operation",
       isRunning: false,
       parameters: [
@@ -830,9 +1027,7 @@
       ]
     }
   ];
-  function delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
+  const SCRIPT_CONFIGS = ALL_SCRIPT_CONFIGS.filter((script) => !script.disabled);
   function containsAnyKeyword(text, keywords, caseSensitive = false) {
     if (keywords.length === 0) return false;
     const searchText = caseSensitive ? text : text.toLowerCase();
@@ -842,65 +1037,18 @@
     });
   }
   function generateId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    return Date.now().toString(36) + Math.random().toString(36).substring(2);
   }
-  const XOR_CODE = 23442827791579;
-  const MASK_CODE = 2251799813685247;
-  const MAX_AID = 1 << 51;
-  const ALPHABET = "FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf";
-  const ENCODE_MAP = [8, 7, 0, 5, 1, 3, 2, 4, 6];
-  const DECODE_MAP = [2, 4, 1, 5, 7, 3, 6, 0, 8];
-  const BASE = ALPHABET.length;
-  const PREFIX = "BV1";
-  const PREFIX_LEN = PREFIX.length;
-  const CODE_LEN = ENCODE_MAP.length;
-  function av2bv(aid) {
-    const bvid = new Array(9);
-    let tmp = (MAX_AID | aid) ^ XOR_CODE;
-    for (let i2 = 0; i2 < CODE_LEN; i2++) {
-      bvid[ENCODE_MAP[i2]] = ALPHABET[tmp % BASE];
-      tmp = Math.floor(tmp / BASE);
-    }
-    return PREFIX + bvid.join("");
-  }
-  function bv2av(bvid) {
-    if (!bvid.startsWith(PREFIX)) {
-      throw new Error(`Invalid BV ID: ${bvid}`);
-    }
-    const code = bvid.slice(PREFIX_LEN);
-    let tmp = 0;
-    for (let i2 = 0; i2 < CODE_LEN; i2++) {
-      const idx = ALPHABET.indexOf(code[DECODE_MAP[i2]]);
-      if (idx === -1) {
-        throw new Error(`Invalid character in BV ID: ${code[DECODE_MAP[i2]]}`);
-      }
-      tmp = tmp * BASE + idx;
-    }
-    return tmp & MASK_CODE ^ XOR_CODE;
-  }
-  function isValidBvid(bvid) {
-    if (!bvid.startsWith(PREFIX) || bvid.length !== PREFIX_LEN + CODE_LEN) {
-      return false;
-    }
-    const code = bvid.slice(PREFIX_LEN);
-    return code.split("").every((char) => ALPHABET.includes(char));
-  }
-  function isValidAid(aid) {
-    return Number.isInteger(aid) && aid > 0 && aid < MAX_AID;
-  }
-  const bvConverter = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-    __proto__: null,
-    av2bv,
-    bv2av,
-    isValidAid,
-    isValidBvid
-  }, Symbol.toStringTag, { value: "Module" }));
   class ScriptExecutor {
     constructor(scriptId, onLog, onProgress) {
       __publicField(this, "execution");
       __publicField(this, "onLog");
       __publicField(this, "onProgress");
       __publicField(this, "shouldStop", false);
+      // 进度管理相关属性
+      __publicField(this, "currentStep", 0);
+      __publicField(this, "totalSteps", 0);
+      __publicField(this, "autoProgressEnabled", false);
       this.execution = {
         id: generateId(),
         scriptId,
@@ -927,9 +1075,38 @@
       this.onLog(logEntry);
     }
     /**
-     * 更新进度
+     * 设置总步骤数，启用基于步骤的进度管理
      */
-    updateProgress(progress) {
+    setTotalSteps(total) {
+      this.totalSteps = total;
+      this.currentStep = 0;
+      this.autoProgressEnabled = true;
+    }
+    /**
+     * 更新进度
+     * @param progressOrCurrentStep 进度百分比(0-100) 或当前步骤数
+     * @param totalSteps 总步骤数（可选，如果提供则使用基于步骤的进度计算）
+     */
+    updateProgress(progressOrCurrentStep, totalSteps) {
+      let progress;
+      if (progressOrCurrentStep === void 0) {
+        if (this.autoProgressEnabled && this.totalSteps > 0) {
+          this.currentStep = Math.min(this.currentStep + 1, this.totalSteps);
+          progress = Math.floor(this.currentStep / this.totalSteps * 100);
+        } else {
+          progress = Math.min(this.execution.progress + 5, 95);
+        }
+      } else if (totalSteps !== void 0) {
+        this.currentStep = progressOrCurrentStep;
+        this.totalSteps = totalSteps;
+        this.autoProgressEnabled = true;
+        progress = Math.floor(this.currentStep / this.totalSteps * 100);
+      } else {
+        progress = progressOrCurrentStep;
+        if (progress >= 0 && progress <= 100) {
+          this.autoProgressEnabled = false;
+        }
+      }
       this.execution.progress = Math.max(0, Math.min(100, progress));
       this.onProgress(this.execution.progress);
     }
@@ -953,14 +1130,16 @@
      */
     async run(parameters) {
       try {
-        this.log("info", "开始执行脚本");
+        this.log("debug", "开始执行脚本");
         this.updateProgress(0);
         const result = await this.execute(parameters);
         this.execution.status = "completed";
         this.execution.endTime = /* @__PURE__ */ new Date();
         this.execution.result = result;
-        this.updateProgress(100);
-        this.log("success", "脚本执行完成");
+        if (this.execution.progress < 100) {
+          this.updateProgress(100);
+        }
+        this.log("debug", "脚本执行完成");
       } catch (error) {
         this.execution.status = this.shouldStop ? "stopped" : "failed";
         this.execution.endTime = /* @__PURE__ */ new Date();
@@ -980,83 +1159,6 @@
       return { ...this.execution };
     }
   }
-  const scriptRel = /* @__PURE__ */ function detectScriptRel() {
-    const relList = typeof document !== "undefined" && document.createElement("link").relList;
-    return relList && relList.supports && relList.supports("modulepreload") ? "modulepreload" : "preload";
-  }();
-  const assetsURL = function(dep) {
-    return "/" + dep;
-  };
-  const seen = {};
-  const __vitePreload = function preload(baseModule, deps, importerUrl) {
-    let promise = Promise.resolve();
-    if (deps && deps.length > 0) {
-      let allSettled2 = function(promises) {
-        return Promise.all(
-          promises.map(
-            (p2) => Promise.resolve(p2).then(
-              (value) => ({ status: "fulfilled", value }),
-              (reason) => ({ status: "rejected", reason })
-            )
-          )
-        );
-      };
-      document.getElementsByTagName("link");
-      const cspNonceMeta = document.querySelector(
-        "meta[property=csp-nonce]"
-      );
-      const cspNonce = (cspNonceMeta == null ? void 0 : cspNonceMeta.nonce) || (cspNonceMeta == null ? void 0 : cspNonceMeta.getAttribute("nonce"));
-      promise = allSettled2(
-        deps.map((dep) => {
-          dep = assetsURL(dep);
-          if (dep in seen) return;
-          seen[dep] = true;
-          const isCss = dep.endsWith(".css");
-          const cssSelector = isCss ? '[rel="stylesheet"]' : "";
-          if (document.querySelector(`link[href="${dep}"]${cssSelector}`)) {
-            return;
-          }
-          const link = document.createElement("link");
-          link.rel = isCss ? "stylesheet" : scriptRel;
-          if (!isCss) {
-            link.as = "script";
-          }
-          link.crossOrigin = "";
-          link.href = dep;
-          if (cspNonce) {
-            link.setAttribute("nonce", cspNonce);
-          }
-          document.head.appendChild(link);
-          if (isCss) {
-            return new Promise((res, rej) => {
-              link.addEventListener("load", res);
-              link.addEventListener(
-                "error",
-                () => rej(new Error(`Unable to preload CSS for ${dep}`))
-              );
-            });
-          }
-        })
-      );
-    }
-    function handlePreloadError(err) {
-      const e2 = new Event("vite:preloadError", {
-        cancelable: true
-      });
-      e2.payload = err;
-      window.dispatchEvent(e2);
-      if (!e2.defaultPrevented) {
-        throw err;
-      }
-    }
-    return promise.then((res) => {
-      for (const item of res || []) {
-        if (item.status !== "rejected") continue;
-        handlePreloadError(item.reason);
-      }
-      return baseModule().catch(handlePreloadError);
-    });
-  };
   class TokenBucket {
     constructor(capacity, rate) {
       __publicField(this, "capacity");
@@ -1149,8 +1251,8 @@
           headers: this.baseHeaders,
           onload: (response) => {
             try {
-              const data = JSON.parse(response.responseText);
-              resolve(data);
+              const data2 = JSON.parse(response.responseText);
+              resolve(data2);
             } catch (error) {
               reject(new Error(`Failed to parse response: ${error}`));
             }
@@ -1168,7 +1270,7 @@
     /**
      * 发送POST请求
      */
-    async post(url, data, params) {
+    async post(url, data2, params) {
       await this.tokenBucket.waitForTokens();
       const searchParams = new URLSearchParams();
       if (params) {
@@ -1180,8 +1282,8 @@
       }
       const fullUrl = searchParams.toString() ? `${url}?${searchParams}` : url;
       const formData = new URLSearchParams();
-      if (data) {
-        Object.entries(data).forEach(([key, value]) => {
+      if (data2) {
+        Object.entries(data2).forEach(([key, value]) => {
           if (value !== void 0 && value !== null) {
             formData.append(key, String(value));
           }
@@ -1249,6 +1351,16 @@
     }
     return response.data;
   }
+  async function getFavoriteInfo(favoriteId) {
+    const response = await biliApiClient.get(
+      "https://api.bilibili.com/x/v3/fav/folder/info",
+      { media_id: favoriteId }
+    );
+    if (response.code !== 0) {
+      throw new Error(`Failed to get favorite info: ${response.message}`);
+    }
+    return response.data;
+  }
   async function getFavoriteResourceList(favoriteId, pageIndex = 1, pageSize = 20) {
     const response = await biliApiClient.get(
       "https://api.bilibili.com/x/v3/fav/resource/list",
@@ -1286,21 +1398,33 @@
       throw new Error(`Failed to clear toview list: ${response.message}`);
     }
   }
-  async function addToFavorite(favoriteId, resourceIds) {
-    for (const resource of resourceIds) {
-      const response = await biliApiClient.post(
-        "https://api.bilibili.com/x/v3/fav/resource/deal",
-        {
-          rid: resource.id,
-          type: resource.type,
-          add_media_ids: favoriteId.toString(),
-          del_media_ids: "",
-          csrf: getCsrfToken()
-        }
-      );
-      if (response.code !== 0) {
-        throw new Error(`Failed to add to favorite: ${response.message}`);
+  async function deleteFromFavorite(favoriteId, resourceIds) {
+    const resources = resourceIds.map((r2) => `${r2.id}:${r2.type}`).join(",");
+    const response = await biliApiClient.post(
+      "https://api.bilibili.com/x/v3/fav/resource/batch-del",
+      {
+        media_id: favoriteId,
+        resources,
+        csrf: getCsrfToken()
       }
+    );
+    if (response.code !== 0) {
+      throw new Error(`Failed to delete from favorite: ${response.message}`);
+    }
+  }
+  async function addOrDeleteToFavorite(resourceId, resourceType, addFavoriteIds = [], delFavoriteIds = []) {
+    const response = await biliApiClient.post(
+      "https://api.bilibili.com/x/v3/fav/resource/deal",
+      {
+        rid: resourceId,
+        type: resourceType,
+        add_media_ids: addFavoriteIds.join(","),
+        del_media_ids: delFavoriteIds.join(","),
+        csrf: getCsrfToken()
+      }
+    );
+    if (response.code !== 0) {
+      throw new Error(`Failed to add or delete to favorite: ${response.message}`);
     }
   }
   async function moveToFavorite(fromFavoriteId, toFavoriteId, resourceIds) {
@@ -1357,296 +1481,56 @@
     }
     return response.data;
   }
-  class MoveShortestToToviewExecutor extends ScriptExecutor {
-    async execute(parameters) {
-      const { favoriteId, upTo, durationThreshold, ignoreFrontPage, ignoreTitleKeywords } = parameters;
-      if (!favoriteId) {
-        throw new Error("请输入收藏夹ID");
-      }
-      this.log("info", `开始从收藏夹 ${favoriteId} 移动最短视频到稍后再看`);
-      this.updateProgress(10);
-      try {
-        const toviewList = await getToViewList();
-        const currentCount = toviewList.count;
-        const targetCount = upTo || 100;
-        if (currentCount >= targetCount) {
-          this.log("info", `稍后再看已有 ${currentCount} 个视频，达到目标数量 ${targetCount}`);
-          return { added: 0, currentCount, targetCount };
-        }
-        const needCount = targetCount - currentCount;
-        this.log("info", `需要添加 ${needCount} 个视频到稍后再看`);
-        this.updateProgress(20);
-        const ignorePages = ignoreFrontPage || 6;
-        const keywords = ignoreTitleKeywords ? ignoreTitleKeywords.split(",").map((k2) => k2.trim()) : [];
-        const maxDuration = durationThreshold || 0;
-        let addedCount = 0;
-        let pageIndex = ignorePages + 1;
-        const pageSize = 20;
-        while (addedCount < needCount) {
-          this.checkShouldStop();
-          this.log("info", `正在获取第 ${pageIndex} 页收藏夹资源...`);
-          const favoriteData = await getFavoriteResourceList(favoriteId, pageIndex, pageSize);
-          if (!favoriteData.medias || favoriteData.medias.length === 0) {
-            this.log("warn", "已到达收藏夹末尾，停止添加");
-            break;
-          }
-          let candidates = favoriteData.medias.filter((video) => {
-            if (maxDuration > 0 && video.duration > maxDuration) {
-              return false;
-            }
-            if (keywords.length > 0 && containsAnyKeyword(video.title, keywords)) {
-              return false;
-            }
-            return true;
-          });
-          candidates.sort((a2, b) => a2.duration - b.duration);
-          for (const video of candidates) {
-            if (addedCount >= needCount) break;
-            this.checkShouldStop();
-            try {
-              await addToToView(video.id);
-              addedCount++;
-              this.log("success", `已添加: ${video.title} (时长: ${Math.floor(video.duration / 60)}分钟)`);
-              await delay(1e3);
-            } catch (error) {
-              this.log("error", `添加失败: ${video.title} - ${error instanceof Error ? error.message : String(error)}`);
-            }
-            this.updateProgress(20 + addedCount / needCount * 70);
-          }
-          pageIndex++;
-          await delay(500);
-        }
-        this.log("success", `操作完成，共添加 ${addedCount} 个视频到稍后再看`);
-        return { added: addedCount, currentCount: currentCount + addedCount, targetCount };
-      } catch (error) {
-        this.log("error", `操作失败: ${error instanceof Error ? error.message : String(error)}`);
-        throw error;
-      }
+  async function getVideoInfo(videoId) {
+    videoId = videoId.trim();
+    const url = `https://api.bilibili.com/x/web-interface/view`;
+    const response = await biliApiClient.get(url, {
+      bvid: videoId.toLocaleUpperCase().startsWith("BV") ? videoId : void 0,
+      aid: videoId.toLocaleUpperCase().startsWith("AV") ? parseInt(videoId.slice(2)) : void 0
+    });
+    if (response.code !== 0) {
+      throw new Error(`Failed to get video info: ${response.message}`);
     }
+    return response.data;
   }
-  class AddToviewToFavoriteExecutor extends ScriptExecutor {
-    async execute(parameters) {
-      const { favoriteId, maxCount } = parameters;
-      if (!favoriteId) {
-        throw new Error("请输入收藏夹ID");
-      }
-      this.log("info", `开始将稍后再看的视频添加到收藏夹 ${favoriteId}`);
-      this.updateProgress(10);
-      try {
-        const toviewList = await getToViewList();
-        if (!toviewList.list || toviewList.list.length === 0) {
-          this.log("info", "稍后再看列表为空");
-          return { added: 0, total: 0 };
-        }
-        const maxAdd = maxCount || toviewList.list.length;
-        const videosToAdd = toviewList.list.slice(0, maxAdd);
-        this.log("info", `准备添加 ${videosToAdd.length} 个视频到收藏夹`);
-        this.updateProgress(20);
-        let addedCount = 0;
-        const total = videosToAdd.length;
-        for (let i2 = 0; i2 < total; i2++) {
-          this.checkShouldStop();
-          const video = videosToAdd[i2];
-          this.log("info", `正在添加: ${video.title} (${i2 + 1}/${total})`);
-          try {
-            await addToFavorite(favoriteId, [{ id: video.id, type: video.type }]);
-            addedCount++;
-            this.log("success", `添加成功: ${video.title}`);
-            await delay(1e3);
-          } catch (error) {
-            this.log("error", `添加失败: ${video.title} - ${error instanceof Error ? error.message : String(error)}`);
-          }
-          this.updateProgress(20 + (i2 + 1) / total * 70);
-        }
-        this.log("success", `操作完成，成功添加 ${addedCount}/${total} 个视频到收藏夹`);
-        return { added: addedCount, total };
-      } catch (error) {
-        this.log("error", `操作失败: ${error instanceof Error ? error.message : String(error)}`);
-        throw error;
-      }
+  async function getFavoriteList(uid) {
+    const response = await biliApiClient.get(
+      "https://api.bilibili.com/x/v3/fav/folder/created/list-all",
+      { up_mid: getUserId() }
+    );
+    if (response.code !== 0) {
+      throw new Error(`Failed to get favorite list: ${response.message}`);
     }
+    return response.data;
   }
-  class MoveFavoriteExecutor extends ScriptExecutor {
-    async execute(parameters) {
-      const { fromFavorite, toFavorite, upTo, onlyWithKeywords } = parameters;
-      if (!fromFavorite || !toFavorite) {
-        throw new Error("请输入源收藏夹ID和目标收藏夹ID");
-      }
-      this.log("info", `开始从收藏夹 ${fromFavorite} 移动视频到收藏夹 ${toFavorite}`);
-      this.updateProgress(10);
-      try {
-        const keywords = onlyWithKeywords ? onlyWithKeywords.split(",").map((k2) => k2.trim()) : [];
-        const maxCount = upTo || 1e3;
-        let movedCount = 0;
-        let pageIndex = 1;
-        const pageSize = 20;
-        while (movedCount < maxCount) {
-          this.checkShouldStop();
-          this.log("info", `正在获取第 ${pageIndex} 页源收藏夹资源...`);
-          const favoriteData = await getFavoriteResourceList(fromFavorite, pageIndex, pageSize);
-          if (!favoriteData.medias || favoriteData.medias.length === 0) {
-            this.log("info", "已处理完所有视频");
-            break;
-          }
-          let candidates = favoriteData.medias;
-          if (keywords.length > 0) {
-            candidates = candidates.filter(
-              (video) => containsAnyKeyword(video.title, keywords)
-            );
-          }
-          for (const video of candidates) {
-            if (movedCount >= maxCount) break;
-            this.checkShouldStop();
-            try {
-              await moveToFavorite(
-                fromFavorite,
-                toFavorite,
-                [{ id: video.id, type: video.type }]
-              );
-              movedCount++;
-              this.log("success", `已移动: ${video.title}`);
-              await delay(1e3);
-            } catch (error) {
-              this.log("error", `移动失败: ${video.title} - ${error instanceof Error ? error.message : String(error)}`);
-            }
-            this.updateProgress(10 + movedCount / maxCount * 80);
-          }
-          pageIndex++;
-          await delay(500);
-        }
-        this.log("success", `操作完成，共移动 ${movedCount} 个视频`);
-        return { moved: movedCount, maxCount };
-      } catch (error) {
-        this.log("error", `操作失败: ${error instanceof Error ? error.message : String(error)}`);
-        throw error;
-      }
+  const XOR_CODE = 23442827791579n;
+  const MASK_CODE = 2251799813685247n;
+  const MAX_AID = 1n << 51n;
+  const BASE = 58n;
+  const data = "FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf";
+  function av2bv(aid) {
+    const bytes = ["B", "V", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0"];
+    let bvIndex = bytes.length - 1;
+    let tmp = (MAX_AID | BigInt(aid)) ^ XOR_CODE;
+    while (tmp > 0) {
+      bytes[bvIndex] = data[Number(tmp % BigInt(BASE))];
+      tmp = tmp / BASE;
+      bvIndex -= 1;
     }
+    [bytes[3], bytes[9]] = [bytes[9], bytes[3]];
+    [bytes[4], bytes[7]] = [bytes[7], bytes[4]];
+    return bytes.join("");
   }
-  class MoveSingleMediaExecutor extends ScriptExecutor {
-    async execute(parameters) {
-      const { mediaId, fromFavorite, toFavorite } = parameters;
-      if (!mediaId || !fromFavorite || !toFavorite) {
-        throw new Error("请输入视频ID、源收藏夹ID和目标收藏夹ID");
-      }
-      this.log("info", `开始移动视频 ${mediaId} 从收藏夹 ${fromFavorite} 到收藏夹 ${toFavorite}`);
-      this.updateProgress(20);
-      try {
-        let videoId;
-        let videoType = 2;
-        if (mediaId.startsWith("BV")) {
-          const { bv2av: bv2av2 } = await __vitePreload(async () => {
-            const { bv2av: bv2av3 } = await Promise.resolve().then(() => bvConverter);
-            return { bv2av: bv2av3 };
-          }, true ? void 0 : void 0);
-          videoId = bv2av2(mediaId);
-        } else if (mediaId.startsWith("av")) {
-          videoId = parseInt(mediaId.slice(2));
-        } else {
-          videoId = parseInt(mediaId);
-        }
-        if (isNaN(videoId)) {
-          throw new Error("无效的视频ID格式");
-        }
-        this.updateProgress(50);
-        await moveToFavorite(
-          fromFavorite,
-          toFavorite,
-          [{ id: videoId, type: videoType }]
-        );
-        this.updateProgress(100);
-        this.log("success", `视频移动成功: ${mediaId}`);
-        return { mediaId, fromFavorite, toFavorite, success: true };
-      } catch (error) {
-        this.log("error", `移动失败: ${error instanceof Error ? error.message : String(error)}`);
-        throw error;
-      }
-    }
+  function bv2av(bvid) {
+    const bvidArr = Array.from(bvid);
+    [bvidArr[3], bvidArr[9]] = [bvidArr[9], bvidArr[3]];
+    [bvidArr[4], bvidArr[7]] = [bvidArr[7], bvidArr[4]];
+    bvidArr.splice(0, 3);
+    const tmp = bvidArr.reduce((pre, bvidChar) => pre * BASE + BigInt(data.indexOf(bvidChar)), 0n);
+    return Number(tmp & MASK_CODE ^ XOR_CODE);
   }
-  class DeleteTimeoutLotteryExecutor extends ScriptExecutor {
-    async execute(parameters) {
-      var _a, _b, _c, _d;
-      const { detectOnly, notDeleteWinning, userId } = parameters;
-      this.log("info", `开始${detectOnly ? "检测" : "删除"}过期抽奖动态`);
-      this.updateProgress(10);
-      try {
-        let deletedCount = 0;
-        let detectedCount = 0;
-        let offset = "";
-        while (true) {
-          this.checkShouldStop();
-          this.log("info", "正在获取动态列表...");
-          const dynamicData = await getDynamicList(userId, offset);
-          if (!dynamicData.items || dynamicData.items.length === 0) {
-            this.log("info", "已处理完所有动态");
-            break;
-          }
-          for (const item of dynamicData.items) {
-            this.checkShouldStop();
-            if (item.type === "DYNAMIC_TYPE_FORWARD" && ((_c = (_b = (_a = item.modules) == null ? void 0 : _a.module_dynamic) == null ? void 0 : _b.additional) == null ? void 0 : _c.type) === "ADDITIONAL_TYPE_LOTTERY") {
-              try {
-                const lotteryInfo = await getLotteryInfo(item.id_str);
-                const isExpired = new Date(lotteryInfo.lottery_time * 1e3) < /* @__PURE__ */ new Date();
-                const isWinning = (_d = lotteryInfo.lottery_result) == null ? void 0 : _d.is_winner;
-                if (isExpired) {
-                  detectedCount++;
-                  if (notDeleteWinning && isWinning) {
-                    this.log("info", `跳过中奖动态: ${item.id_str}`);
-                    continue;
-                  }
-                  if (!detectOnly) {
-                    await deleteDynamic(item.id_str);
-                    deletedCount++;
-                    this.log("success", `已删除过期抽奖动态: ${item.id_str}`);
-                    await delay(1e3);
-                  } else {
-                    this.log("info", `检测到过期抽奖动态: ${item.id_str}`);
-                  }
-                }
-              } catch (error) {
-                this.log("error", `处理动态失败: ${item.id_str} - ${error instanceof Error ? error.message : String(error)}`);
-              }
-            }
-          }
-          offset = dynamicData.offset;
-          if (!offset) break;
-          await delay(500);
-          this.updateProgress(Math.min(90, 10 + detectedCount * 2));
-        }
-        const message = detectOnly ? `检测完成，发现 ${detectedCount} 个过期抽奖动态` : `删除完成，共删除 ${deletedCount}/${detectedCount} 个过期抽奖动态`;
-        this.log("success", message);
-        return { detected: detectedCount, deleted: deletedCount, detectOnly };
-      } catch (error) {
-        this.log("error", `操作失败: ${error instanceof Error ? error.message : String(error)}`);
-        throw error;
-      }
-    }
-  }
-  class ClearToviewExecutor extends ScriptExecutor {
-    async execute(parameters) {
-      const { confirm } = parameters;
-      if (!confirm) {
-        throw new Error("请确认要清空稍后再看列表");
-      }
-      this.log("info", "开始清空稍后再看列表");
-      this.updateProgress(20);
-      try {
-        const toviewList = await getToViewList();
-        const totalCount = toviewList.count;
-        if (totalCount === 0) {
-          this.log("info", "稍后再看列表已为空");
-          return { cleared: 0, total: 0 };
-        }
-        this.log("info", `准备清空 ${totalCount} 个视频`);
-        this.updateProgress(50);
-        await clearToViewList();
-        this.updateProgress(100);
-        this.log("success", `成功清空稍后再看列表，共清除 ${totalCount} 个视频`);
-        return { cleared: totalCount, total: totalCount };
-      } catch (error) {
-        this.log("error", `清空失败: ${error instanceof Error ? error.message : String(error)}`);
-        throw error;
-      }
-    }
+  function isValidAid(aid) {
+    return typeof aid === "number" && Number.isInteger(aid) && aid > 0 && BigInt(aid) < MAX_AID;
   }
   class BvAvConverterExecutor extends ScriptExecutor {
     async execute(parameters) {
@@ -1655,14 +1539,15 @@
         throw new Error("请输入视频ID");
       }
       this.log("info", `开始转换视频ID: ${videoId}`);
-      this.updateProgress(20);
+      this.log("debug", `输入参数: ${JSON.stringify(parameters)}`);
+      this.updateProgress(10);
       try {
         let result;
         if (videoId.startsWith("BV")) {
-          if (!isValidBvid(videoId)) {
-            throw new Error("无效的BV号格式");
-          }
+          this.log("debug", `检测到BV号格式，准备转换为AV号`);
           const aid = bv2av(videoId);
+          this.log("debug", `转换结果: BV号 ${videoId} → AV号 ${aid}`);
+          this.updateProgress(50);
           result = {
             input: videoId,
             output: `av${aid}`,
@@ -1714,7 +1599,7 @@
         throw new Error("请输入至少一个视频ID");
       }
       this.log("info", `开始获取 ${idList.length} 个视频的信息`);
-      this.updateProgress(10);
+      this.setTotalSteps(idList.length);
       const results = [];
       const total = idList.length;
       for (let i2 = 0; i2 < total; i2++) {
@@ -1722,16 +1607,15 @@
         const videoId = idList[i2];
         this.log("info", `正在处理: ${videoId} (${i2 + 1}/${total})`);
         try {
-          await delay(500);
-          const info = {
+          const info = await getVideoInfo(videoId);
+          results.push({
             id: videoId,
-            title: `视频标题 - ${videoId}`,
-            duration: Math.floor(Math.random() * 3600),
-            author: "作者名称",
-            view: Math.floor(Math.random() * 1e5),
-            like: Math.floor(Math.random() * 1e4)
-          };
-          results.push(info);
+            title: info.title,
+            duration: info.duration || 0,
+            bvid: info.bvid,
+            aid: info.aid,
+            type: info.type
+          });
           this.log("success", `获取成功: ${videoId} - ${info.title}`);
         } catch (error) {
           this.log("error", `获取失败: ${videoId} - ${error instanceof Error ? error.message : String(error)}`);
@@ -1740,10 +1624,451 @@
             error: error instanceof Error ? error.message : String(error)
           });
         }
-        this.updateProgress(10 + (i2 + 1) / total * 90);
+        this.updateProgress(i2 + 1, total);
       }
-      this.log("info", `处理完成，成功: ${results.filter((r2) => !r2.error).length}，失败: ${results.filter((r2) => r2.error).length}`);
-      return { results, total: results.length };
+      const successCount = results.filter((r2) => !r2.error).length;
+      const failCount = results.filter((r2) => r2.error).length;
+      this.log("success", `视频信息获取任务完成！成功获取 ${successCount} 个视频信息，失败 ${failCount} 个`);
+      if (successCount > 0) {
+        this.log("info", `成功获取的视频：${results.filter((r2) => !r2.error).map((r2) => r2.title).join(", ")}`);
+      }
+      return { results, total: results.length, successCount, failCount };
+    }
+  }
+  class MoveShortestToToviewExecutor extends ScriptExecutor {
+    async execute(parameters) {
+      const { favoriteId, upTo, durationThreshold, ignoreFrontPage, ignoreTitleKeywords } = parameters;
+      if (!favoriteId) {
+        throw new Error("请输入收藏夹ID");
+      }
+      this.log("info", `开始从收藏夹 ${favoriteId} 移动最短视频到稍后再看`);
+      this.updateProgress(10);
+      const ignoreTitleKeywordList = ignoreTitleKeywords ? ignoreTitleKeywords.split(",").map((k2) => k2.trim()) : [];
+      const maxCount = upTo || 1e3;
+      let needCount = maxCount;
+      const maxDuration = durationThreshold || 0;
+      const ignorePageCount = ignoreFrontPage || 6;
+      const originVideoInfos = [];
+      const willMoveVideoInfos = [];
+      try {
+        this.log("info", `正在获取稍后再看当前数量...`);
+        this.checkShouldStop();
+        const toviewList = await getToViewList();
+        const currentCount = toviewList.count;
+        needCount = maxCount - currentCount;
+        let log2 = `稍后再看当前视频数量: ${currentCount}/1000`;
+        log2 += `
+还需要添加: ${needCount}`;
+        if (needCount <= 0) {
+          log2 += `
+稍后再看已达到目标数量，无需添加更多视频`;
+          this.log("info", log2);
+          return { added: 0, currentCount, needCount };
+        }
+        this.log("info", log2);
+        this.updateProgress(40);
+      } catch (error) {
+        this.log("error", `获取稍后再看数量失败: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+      }
+      try {
+        this.log("info", `正在获取源收藏夹所有视频...`);
+        let pageIndex = 1;
+        const pageSize = 20;
+        while (true) {
+          this.checkShouldStop();
+          if (pageIndex <= ignorePageCount) {
+            this.log("debug", `忽略第 ${pageIndex} 页视频...`);
+            pageIndex++;
+            continue;
+          }
+          const pageInfo = await getFavoriteResourceList(favoriteId, pageIndex, pageSize);
+          originVideoInfos.push(...pageInfo.medias);
+          const pageProgress = Math.min(70, (pageIndex - 1) * 5);
+          this.updateProgress(20 + pageProgress);
+          this.log("debug", `已获取 ${originVideoInfos.length} 个视频`);
+          if (!pageInfo.has_more) break;
+          pageIndex++;
+        }
+      } catch (error) {
+        this.log("error", `获取源收藏夹视频失败: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+      }
+      this.log("debug", `正在过滤视频...`);
+      for (const video of originVideoInfos) {
+        if (ignoreTitleKeywordList.length > 0 && containsAnyKeyword(video.title, ignoreTitleKeywordList)) {
+          continue;
+        }
+        if (maxDuration > 0 && video.duration > maxDuration) {
+          continue;
+        }
+        willMoveVideoInfos.push(video);
+        if (willMoveVideoInfos.length >= needCount) break;
+      }
+      let log = `过滤完成，共 ${willMoveVideoInfos.length} 个视频符合条件`;
+      log += `
+将要移动的视频列表: ${willMoveVideoInfos.map((v2) => v2.title).join(", ")}`;
+      this.log("debug", log);
+      this.updateProgress(30);
+      this.log("info", `正在添加视频到稍后再看...`);
+      for (let i2 = 0; i2 < willMoveVideoInfos.length; i2++) {
+        this.checkShouldStop();
+        const video = willMoveVideoInfos[i2];
+        this.log("info", `正在添加: ${video.title} (${i2 + 1}/${willMoveVideoInfos.length})`);
+        try {
+          await addToToView(video.id);
+          this.log("success", `添加成功: ${video.title}`);
+        } catch (error) {
+          this.log("error", `添加失败: ${video.title} - ${error instanceof Error ? error.message : String(error)}`);
+        }
+        this.updateProgress(30 + Math.floor((i2 + 1) / willMoveVideoInfos.length * 60));
+      }
+      this.log("success", `共添加 ${willMoveVideoInfos.length} 个视频到稍后再看`);
+      this.log("info", `正在从收藏夹中删除已移动的视频...`);
+      try {
+        await deleteFromFavorite(
+          favoriteId,
+          willMoveVideoInfos.map((v2) => ({ id: v2.id, type: v2.type }))
+        );
+        this.log("success", `删除成功`);
+        this.updateProgress(100);
+      } catch (error) {
+        this.log("error", `删除失败: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+      }
+      this.log("success", `共删除 ${willMoveVideoInfos.length} 个视频从收藏夹`);
+    }
+  }
+  class AddToviewToFavoriteExecutor extends ScriptExecutor {
+    async execute(parameters) {
+      const { favoriteId, maxCount, disableSpaceCheck } = parameters;
+      if (!favoriteId) {
+        throw new Error("请输入收藏夹ID");
+      }
+      this.log("info", `开始将稍后再看的视频添加到收藏夹 ${favoriteId}`);
+      this.updateProgress(5);
+      try {
+        const toviewList = await getToViewList();
+        if (!toviewList.list || toviewList.list.length === 0) {
+          this.log("info", "稍后再看列表为空");
+          return { added: 0, total: 0 };
+        }
+        const maxAdd = maxCount || toviewList.list.length;
+        const videosToAdd = toviewList.list.slice(0, maxAdd).reverse();
+        this.log("info", `准备添加 ${videosToAdd.length} 个视频到收藏夹`);
+        this.updateProgress(10);
+        if (disableSpaceCheck) {
+          this.log("info", "已关闭空间检查，将跳过容量验证");
+        } else {
+          this.log("debug", "正在检查收藏夹容量...");
+          const favoriteInfo = await getFavoriteInfo(favoriteId);
+          const currentCount = favoriteInfo.media_count;
+          const toAddCount = videosToAdd.length;
+          const remainingSpace = 1e3 - currentCount;
+          let log = `收藏夹当前视频数量: ${currentCount}/1000`;
+          log += `
+待添加视频数量: ${toAddCount}`;
+          log += `
+剩余空间: ${remainingSpace}`;
+          this.log("debug", log);
+          if (currentCount + toAddCount > 1e3) {
+            this.log("error", `收藏夹空间不足，无法添加所有视频。当前: ${currentCount}，待添加: ${toAddCount}，剩余空间: ${remainingSpace}`);
+            throw new Error("收藏夹空间不足，无法添加所有视频");
+          }
+        }
+        this.updateProgress(20);
+        let addedCount = 0;
+        const total = videosToAdd.length;
+        this.log("debug", `开始逐个添加 ${total} 个视频到收藏夹`);
+        this.setTotalSteps(total);
+        for (let i2 = 0; i2 < total; i2++) {
+          this.checkShouldStop();
+          const video = videosToAdd[i2];
+          let log = `正在添加: ${video.title} (${i2 + 1}/${total})`;
+          this.log("debug", log);
+          try {
+            await addOrDeleteToFavorite(video.aid, 2, [favoriteId], []);
+            addedCount++;
+            log += `
+添加成功: ${video.title}`;
+            this.log("success", log);
+          } catch (error) {
+            log += `
+添加失败: ${error instanceof Error ? error.message : String(error)}`;
+            this.log("error", log);
+            throw error;
+          }
+          this.updateProgress(20 + Math.floor((i2 + 1) / total * 70));
+        }
+        this.log("success", `操作完成，成功添加 ${addedCount}/${total} 个视频到收藏夹`);
+        if (addedCount > 0) {
+          this.log("info", `成功添加的视频：${videosToAdd.slice(0, addedCount).map((v2) => v2.title).join(", ")}`);
+        }
+        return {
+          added: addedCount,
+          total,
+          videos: videosToAdd.slice(0, addedCount).map((v2) => ({ id: v2.id, title: v2.title }))
+        };
+      } catch (error) {
+        this.log("error", `操作失败: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+      }
+    }
+  }
+  class MoveFavoriteExecutor extends ScriptExecutor {
+    async execute(parameters) {
+      const { fromFavorite, toFavorite, upTo, onlyWithKeywords } = parameters;
+      if (!fromFavorite || !toFavorite) {
+        throw new Error("请输入源收藏夹ID和目标收藏夹ID");
+      }
+      this.log("info", `开始从收藏夹 ${fromFavorite} 移动视频到收藏夹 ${toFavorite}`);
+      this.updateProgress(10);
+      const keywords = onlyWithKeywords ? onlyWithKeywords.split(",").map((k2) => k2.trim()) : [];
+      const maxCount = upTo || 1e3;
+      const originVideoInfos = [];
+      const willMoveVideoInfos = [];
+      try {
+        this.log("info", `正在获取源收藏夹所有视频...`);
+        let pageIndex = 1;
+        const pageSize = 20;
+        while (true) {
+          this.checkShouldStop();
+          const pageInfo = await getFavoriteResourceList(fromFavorite, pageIndex, pageSize);
+          originVideoInfos.push(...pageInfo.medias);
+          const pageProgress = Math.min(30, (pageIndex - 1) * 3);
+          this.updateProgress(20 + pageProgress);
+          this.log("debug", `已获取 ${originVideoInfos.length} 个视频`);
+          if (!pageInfo.has_more) break;
+          pageIndex++;
+        }
+      } catch (error) {
+        this.log("error", `获取源收藏夹视频失败: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+      }
+      this.log("debug", `正在过滤视频...`);
+      for (const video of originVideoInfos) {
+        if (keywords.length > 0 && !containsAnyKeyword(video.title, keywords)) {
+          continue;
+        }
+        willMoveVideoInfos.push(video);
+        if (willMoveVideoInfos.length >= maxCount) break;
+      }
+      let log = `过滤完成，共 ${willMoveVideoInfos.length} 个视频符合条件`;
+      log += `
+将要移动的视频列表: ${willMoveVideoInfos.map((v2) => v2.title).join(", ")}`;
+      this.log("debug", log);
+      this.updateProgress(30);
+      try {
+        this.log("info", `正在获取目标收藏夹信息...`);
+        this.checkShouldStop();
+        const targetFavoriteInfo = await getFavoriteInfo(toFavorite);
+        const currentCount = targetFavoriteInfo.media_count;
+        const remainingSpace = 1e3 - currentCount;
+        log = `目标收藏夹当前视频数量: ${currentCount}/1000`;
+        log += `
+剩余空间: ${remainingSpace}`;
+        this.log("info", log);
+        if (willMoveVideoInfos.length > remainingSpace) {
+          this.log("error", `目标收藏夹空间不足，无法移动所有视频。当前: ${currentCount}，待添加: ${willMoveVideoInfos.length}，剩余空间: ${remainingSpace}`);
+          throw new Error("目标收藏夹空间不足，无法移动所有视频");
+        }
+      } catch (error) {
+        this.log("error", `获取目标收藏夹信息失败: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+      }
+      this.updateProgress(40);
+      this.log("info", `正在移动视频...`);
+      try {
+        this.checkShouldStop();
+        await moveToFavorite(
+          fromFavorite,
+          toFavorite,
+          willMoveVideoInfos.map((v2) => ({ id: v2.id, type: v2.type }))
+        );
+      } catch (error) {
+        this.log("error", `视频移动失败: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+      }
+      this.log("success", `操作完成，共移动 ${willMoveVideoInfos.length} 个视频`);
+      return { moved: willMoveVideoInfos.length, maxCount };
+    }
+  }
+  class DeleteTimeoutLotteryExecutor extends ScriptExecutor {
+    async execute(parameters) {
+      var _a, _b;
+      const { detectOnly, notDeleteWinning, userId } = parameters;
+      this.log("info", `开始${detectOnly ? "检测" : "删除"}过期抽奖动态`);
+      let log = `执行参数: ${JSON.stringify(parameters)}。`;
+      log += `
+仅检测模式: ${detectOnly ? "是" : "否"}。`;
+      log += `
+保护中奖动态: ${notDeleteWinning ? "是" : "否"}。`;
+      log += `
+目标用户: ${userId || "当前登录用户"}。`;
+      log += "\n========== 开始执行过期抽奖动态处理 ==========";
+      this.log("debug", log);
+      this.updateProgress(10);
+      try {
+        let deletedCount = 0;
+        let detectedCount = 0;
+        let listOffset = "";
+        while (true) {
+          this.checkShouldStop();
+          this.log("info", "正在获取动态列表...");
+          this.log("debug", `请求参数: userId=${userId || "当前用户"}, offset=${listOffset || "初始页面"}`);
+          const dynamicData = await getDynamicList(userId, listOffset);
+          const hasMore = dynamicData.has_more;
+          listOffset = dynamicData.offset;
+          for (let i2 = 0; i2 < dynamicData.items.length; i2++) {
+            const item = dynamicData.items[i2];
+            this.checkShouldStop();
+            this.log("debug", `---------- 处理动态 ${i2 + 1}/${dynamicData.items.length} ----------`);
+            const pageProgress = Math.floor(i2 / dynamicData.items.length * 15);
+            this.updateProgress(10 + pageProgress);
+            const dynamicId = item.id_str;
+            const publisherInfo = item.modules.module_author;
+            const publisherId = publisherInfo.mid;
+            const publishTimestamp = publisherInfo.pub_ts;
+            const dynamicText = (_a = item.modules.module_dynamic.desc) == null ? void 0 : _a.text.replace("\n", "");
+            const dynamicType = item.type;
+            log = `动态ID: ${item.id_str}`;
+            log += `
+发布时间：${new Date(publishTimestamp * 1e3).toLocaleString("zh-CN")}`;
+            log += `
+动态类型: ${dynamicType}`;
+            log += `
+动态内容: ${dynamicText}`;
+            if (dynamicType !== "DYNAMIC_TYPE_FORWARD") {
+              log += `
+非转发动态，跳过`;
+              this.log("info", log);
+              continue;
+            }
+            const originDynamic = item.orig;
+            const originDynamicId = originDynamic.id_str;
+            const originDynamicPublisherInfo = originDynamic.modules.module_author;
+            const originDynamicPublisherId = originDynamicPublisherInfo.mid;
+            const originDynamicPublisherName = originDynamicPublisherInfo.name;
+            const originDynamicPublishTimestamp = originDynamicPublisherInfo.pub_ts;
+            const originDynamicType = originDynamic.type;
+            log += `
+被转发动态ID: ${originDynamicId}`;
+            log += `
+被转发动态发布者: ${originDynamicPublisherName}(${originDynamicPublisherId})`;
+            log += `
+被转发动态发布时间: ${new Date(originDynamicPublishTimestamp * 1e3).toLocaleString("zh-CN")}`;
+            log += `
+被转发动态类型: ${originDynamicType}`;
+            if (["DYNAMIC_TYPE_DRAW", "DYNAMIC_TYPE_WORD"].indexOf(originDynamicType) === -1) {
+              log += `
+被转发动态非文本动态类型，跳过`;
+              this.log("info", log);
+              continue;
+            }
+            const hasLotteryNode = originDynamic.modules.module_dynamic.desc.rich_text_nodes.some(
+              (node) => node.type === "RICH_TEXT_NODE_TYPE_LOTTERY"
+            );
+            if (!hasLotteryNode) {
+              log += `
+被转发动态非抽奖动态，跳过`;
+              this.log("info", log);
+              continue;
+            }
+            const originDynamicText = (_b = originDynamic.modules.module_dynamic.desc) == null ? void 0 : _b.text.replace("\n", "");
+            log += `
+被转发动态内容: ${originDynamicText}`;
+            this.log("info", log);
+            this.log("debug", "正在获取抽奖信息...");
+            const lotteryInfo = await getLotteryInfo(originDynamicId);
+            this.log("debug", `抽奖信息: ${JSON.stringify(lotteryInfo)}`);
+            const lotteryStatus = lotteryInfo.status;
+            const lotteryTimestamp = lotteryInfo.lottery_time;
+            const lotteryParticipated = lotteryInfo.participated;
+            const lotteryFollowed = lotteryInfo.followed;
+            const lotteryReposted = lotteryInfo.reposted;
+            log = `抽奖状态: ${lotteryStatus}`;
+            log += `
+开奖时间: ${new Date(lotteryTimestamp * 1e3).toLocaleString("zh-CN")}`;
+            log += `
+是否参与: ${lotteryParticipated}`;
+            log += `
+是否关注了发布者: ${lotteryFollowed}`;
+            log += `
+是否转发了本动态: ${lotteryReposted}`;
+            const lotteryResult = lotteryInfo.lottery_result;
+            if (!lotteryResult) {
+              log += `
+未找到开奖结果，跳过`;
+              this.log("info", log);
+              continue;
+            }
+            const win = Object.values(lotteryResult).some((userList) => {
+              if (!Array.isArray(userList)) return false;
+              return userList.some((user) => user.uid === publisherId);
+            });
+            log += `
+是否中奖: ${win}`;
+            detectedCount++;
+            if (detectOnly) {
+              log += `
+仅检测模式，跳过删除`;
+              this.log("info", log);
+              continue;
+            }
+            if (win && notDeleteWinning) {
+              log += `
+不删除中奖动态，跳过`;
+              this.log("info", log);
+              continue;
+            }
+            this.log("debug", "正在删除动态...");
+            await deleteDynamic(dynamicId);
+            deletedCount++;
+            this.log("debug", "动态删除成功");
+          }
+          this.log("debug", "========== 当前页面处理完成 ==========");
+          if (!hasMore) {
+            this.log("debug", "已到达最后一页，结束处理");
+            break;
+          }
+          const detectionProgress = Math.min(75, detectedCount * 3);
+          this.updateProgress(10 + detectionProgress);
+          this.log("debug", `当前进度: 已检测到 ${detectedCount} 个过期抽奖动态，已删除 ${deletedCount} 个`);
+        }
+        const message = detectOnly ? `检测完成，发现 ${detectedCount} 个过期抽奖动态` : `删除完成，共删除 ${deletedCount}/${detectedCount} 个过期抽奖动态`;
+        this.log("success", message);
+        return { detected: detectedCount, deleted: deletedCount, detectOnly };
+      } catch (error) {
+        this.log("error", `操作失败: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+      }
+    }
+  }
+  class ClearToviewExecutor extends ScriptExecutor {
+    async execute(parameters) {
+      const { confirm } = parameters;
+      if (!confirm) {
+        throw new Error("请确认要清空稍后再看列表");
+      }
+      this.log("info", "开始清空稍后再看列表");
+      this.updateProgress(20);
+      try {
+        const toviewList = await getToViewList();
+        const totalCount = toviewList.count;
+        if (totalCount === 0) {
+          this.log("info", "稍后再看列表已为空");
+          return { cleared: 0, total: 0 };
+        }
+        this.log("info", `准备清空 ${totalCount} 个视频`);
+        this.updateProgress(50);
+        await clearToViewList();
+        this.updateProgress(100);
+        this.log("success", `成功清空稍后再看列表，共清除 ${totalCount} 个视频`);
+        return { cleared: totalCount, total: totalCount };
+      } catch (error) {
+        this.log("error", `清空失败: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+      }
     }
   }
   function createScriptExecutor(scriptId, onLog, onProgress) {
@@ -1758,8 +2083,6 @@
         return new AddToviewToFavoriteExecutor(scriptId, onLog, onProgress);
       case "move_favorite_to_another":
         return new MoveFavoriteExecutor(scriptId, onLog, onProgress);
-      case "move_single_media":
-        return new MoveSingleMediaExecutor(scriptId, onLog, onProgress);
       case "delete_timeout_lottery":
         return new DeleteTimeoutLotteryExecutor(scriptId, onLog, onProgress);
       case "clear_toview":
@@ -1868,11 +2191,11 @@
     if (!containerElement) return 1200;
     return containerElement.clientWidth;
   }
-  function debounce(func, delay2) {
+  function debounce(func, delay) {
     let timeoutId;
     return (...args) => {
       clearTimeout(timeoutId);
-      timeoutId = window.setTimeout(() => func(...args), delay2);
+      timeoutId = window.setTimeout(() => func(...args), delay);
     };
   }
   function ScriptManager() {
@@ -1882,9 +2205,12 @@
       executions: [],
       logs: [],
       selectedScript: null,
-      isModalOpen: true
+      isModalOpen: true,
+      favoriteList: null,
+      favoriteListLoading: false,
+      favoriteListError: null
     }));
-    const [panelRatio, setPanelRatio] = d(0.4);
+    const [panelRatio, setPanelRatio] = d(0.6);
     const [resizeState, setResizeState] = d({
       isDragging: false,
       startX: 0,
@@ -1919,7 +2245,7 @@
       } catch (error) {
         console.warn("Failed to load saved logs:", error);
       }
-      const savedRatio = _GM_getValue("bili_tasks_panel_ratio", "0.4");
+      const savedRatio = _GM_getValue("bili_tasks_panel_ratio", "0.6");
       try {
         const ratio = parseFloat(savedRatio);
         if (ratio >= 0.2 && ratio <= 0.8) {
@@ -1928,7 +2254,31 @@
       } catch (error) {
         console.warn("Failed to load saved panel ratio:", error);
       }
+      loadFavoriteList();
     }, []);
+    const loadFavoriteList = async () => {
+      setAppState((prev) => ({
+        ...prev,
+        favoriteListLoading: true,
+        favoriteListError: null
+      }));
+      try {
+        const favoriteList = await getFavoriteList();
+        setAppState((prev) => ({
+          ...prev,
+          favoriteList,
+          favoriteListLoading: false
+        }));
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "获取收藏夹列表失败";
+        setAppState((prev) => ({
+          ...prev,
+          favoriteListLoading: false,
+          favoriteListError: errorMessage
+        }));
+        console.error("Failed to load favorite list:", error);
+      }
+    };
     y(() => {
       const logsToSave = appState.logs.slice(-100);
       _GM_setValue("bili_tasks_logs", JSON.stringify(logsToSave));
@@ -2067,7 +2417,7 @@
     const operationScripts = appState.scripts.filter((script) => script.category === "operation");
     return /* @__PURE__ */ u$1("div", { class: "script-manager", ref: containerRef, children: [
       /* @__PURE__ */ u$1("div", { class: "script-manager-header", children: [
-        /* @__PURE__ */ u$1("h1", { children: "哔哩哔哩任务管理器" }),
+        /* @__PURE__ */ u$1("h1", { children: "【哔哩哔哩】一些任务" }),
         /* @__PURE__ */ u$1("p", { children: [
           "作者：AkagiYui | 仓库：",
           /* @__PURE__ */ u$1("a", { href: "https://github.com/AkagiYui", target: "_blank", rel: "noopener noreferrer", children: "github.com/AkagiYui" })
@@ -2095,7 +2445,7 @@
             style: { width: isMobileOrSmallScreen() ? "auto" : `${panelWidths.leftWidth}px` },
             children: [
               /* @__PURE__ */ u$1("div", { class: "scripts-section", children: [
-                /* @__PURE__ */ u$1("h2", { children: "🔧 工具脚本" }),
+                /* @__PURE__ */ u$1("h2", { children: "🔧 工具脚本 (日志输出目标信息)" }),
                 /* @__PURE__ */ u$1("div", { class: "scripts-list", children: toolScripts.map((script) => /* @__PURE__ */ u$1(
                   ScriptCard,
                   {
@@ -2103,13 +2453,17 @@
                     onExecute: handleExecuteScript,
                     onStop: handleStopScript,
                     isRunning: script.isRunning,
-                    progress: getScriptProgress(script.id)
+                    progress: getScriptProgress(script.id),
+                    favoriteList: appState.favoriteList,
+                    favoriteListLoading: appState.favoriteListLoading,
+                    favoriteListError: appState.favoriteListError,
+                    onRetryFavoriteList: loadFavoriteList
                   },
                   script.id
                 )) })
               ] }),
               /* @__PURE__ */ u$1("div", { class: "scripts-section", children: [
-                /* @__PURE__ */ u$1("h2", { children: "⚙️ 操作脚本" }),
+                /* @__PURE__ */ u$1("h2", { children: "⚙️ 操作脚本 (不需要输出信息，正确执行完毕后即达成目标)" }),
                 /* @__PURE__ */ u$1("div", { class: "scripts-list", children: operationScripts.map((script) => /* @__PURE__ */ u$1(
                   ScriptCard,
                   {
@@ -2117,7 +2471,11 @@
                     onExecute: handleExecuteScript,
                     onStop: handleStopScript,
                     isRunning: script.isRunning,
-                    progress: getScriptProgress(script.id)
+                    progress: getScriptProgress(script.id),
+                    favoriteList: appState.favoriteList,
+                    favoriteListLoading: appState.favoriteListLoading,
+                    favoriteListError: appState.favoriteListError,
+                    onRetryFavoriteList: loadFavoriteList
                   },
                   script.id
                 )) })
