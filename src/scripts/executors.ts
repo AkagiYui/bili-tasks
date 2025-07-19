@@ -30,7 +30,7 @@ export class BvAvConverterExecutor extends ScriptExecutor {
 
     this.log('info', `开始转换视频ID: ${videoId}`);
     this.log('debug', `输入参数: ${JSON.stringify(parameters)}`);
-    this.updateProgress(20);
+    this.updateProgress(10);
 
     try {
       let result: { input: string; output: string; type: string };
@@ -39,6 +39,7 @@ export class BvAvConverterExecutor extends ScriptExecutor {
         this.log('debug', `检测到BV号格式，准备转换为AV号`);
         const aid = bv2av(videoId);
         this.log('debug', `转换结果: BV号 ${videoId} → AV号 ${aid}`);
+        this.updateProgress(50);
         result = {
           input: videoId,
           output: `av${aid}`,
@@ -99,7 +100,7 @@ export class VideoInfoExecutor extends ScriptExecutor {
     }
 
     this.log('info', `开始获取 ${idList.length} 个视频的信息`);
-    this.updateProgress(10);
+    this.setTotalSteps(idList.length);
 
     const results: any[] = [];
     const total = idList.length;
@@ -131,7 +132,7 @@ export class VideoInfoExecutor extends ScriptExecutor {
         });
       }
 
-      this.updateProgress(10 + (i + 1) / total * 90);
+      this.updateProgress(i + 1, total);
     }
 
     const successCount = results.filter(r => !r.error).length;
@@ -205,7 +206,9 @@ export class MoveShortestToToviewExecutor extends ScriptExecutor {
         }
         const pageInfo = await getFavoriteResourceList(favoriteId, pageIndex, pageSize);
         originVideoInfos.push(...pageInfo.medias);
-        this.updateProgress(20 + (pageIndex / 10) * 70);
+        // 使用更合理的进度计算：20% + 当前页数的进度
+        const pageProgress = Math.min(70, (pageIndex - 1) * 5); // 每页增加5%，最多70%
+        this.updateProgress(20 + pageProgress);
         this.log('debug', `已获取 ${originVideoInfos.length} 个视频`);
         if (!pageInfo.has_more) break;
         pageIndex++;
@@ -244,7 +247,8 @@ export class MoveShortestToToviewExecutor extends ScriptExecutor {
       } catch (error) {
         this.log('error', `添加失败: ${video.title} - ${error instanceof Error ? error.message : String(error)}`);
       }
-      this.updateProgress(30 + (i + 1) / willMoveVideoInfos.length * 60);
+      // 30% + 60% * 当前进度
+      this.updateProgress(30 + Math.floor((i + 1) / willMoveVideoInfos.length * 60));
     }
     this.log('success', `共添加 ${willMoveVideoInfos.length} 个视频到稍后再看`);
 
@@ -322,6 +326,8 @@ export class AddToviewToFavoriteExecutor extends ScriptExecutor {
       const total = videosToAdd.length;
 
       this.log('debug', `开始逐个添加 ${total} 个视频到收藏夹`);
+      // 设置基于步骤的进度管理，从20%开始，到90%结束
+      this.setTotalSteps(total);
 
       for (let i = 0; i < total; i++) {
         this.checkShouldStop();
@@ -342,7 +348,8 @@ export class AddToviewToFavoriteExecutor extends ScriptExecutor {
           throw error;
         }
 
-        this.updateProgress(30 + (i + 1) / total * 60);
+        // 使用基于步骤的进度：20% + 70% * 当前进度
+        this.updateProgress(20 + Math.floor((i + 1) / total * 70));
       }
 
       this.log('success', `操作完成，成功添加 ${addedCount}/${total} 个视频到收藏夹`);
@@ -393,7 +400,9 @@ export class MoveFavoriteExecutor extends ScriptExecutor {
         this.checkShouldStop();
         const pageInfo = await getFavoriteResourceList(fromFavorite, pageIndex, pageSize);
         originVideoInfos.push(...pageInfo.medias);
-        this.updateProgress(20 + (pageIndex / 10) * 70);
+        // 修复分页进度计算：每页增加3%，最多到50%
+        const pageProgress = Math.min(30, (pageIndex - 1) * 3);
+        this.updateProgress(20 + pageProgress);
         this.log('debug', `已获取 ${originVideoInfos.length} 个视频`);
         if (!pageInfo.has_more) break;
         pageIndex++;
@@ -493,7 +502,9 @@ export class DeleteTimeoutLotteryExecutor extends ScriptExecutor {
           this.checkShouldStop();
 
           this.log('debug', `---------- 处理动态 ${i + 1}/${dynamicData.items.length} ----------`);
-          this.updateProgress(10 + (i / dynamicData.items.length) * 80);
+          // 更合理的进度计算：每页动态处理进度
+          const pageProgress = Math.floor((i / dynamicData.items.length) * 15); // 每页最多15%
+          this.updateProgress(10 + pageProgress);
 
           // 动态基本信息
           const dynamicId: string = item.id_str
@@ -606,7 +617,9 @@ export class DeleteTimeoutLotteryExecutor extends ScriptExecutor {
           break;
         }
 
-        this.updateProgress(Math.min(90, 10 + detectedCount * 2));
+        // 基于检测到的数量更新进度，但不超过85%
+        const detectionProgress = Math.min(75, detectedCount * 3);
+        this.updateProgress(10 + detectionProgress);
         this.log('debug', `当前进度: 已检测到 ${detectedCount} 个过期抽奖动态，已删除 ${deletedCount} 个`);
       }
 

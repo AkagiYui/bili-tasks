@@ -10,6 +10,11 @@ export abstract class ScriptExecutor {
   protected onProgress: (progress: number) => void;
   protected shouldStop: boolean = false;
 
+  // 进度管理相关属性
+  private currentStep: number = 0;
+  private totalSteps: number = 0;
+  private autoProgressEnabled: boolean = false;
+
   constructor(
     scriptId: string,
     onLog: (log: LogEntry) => void,
@@ -44,9 +49,46 @@ export abstract class ScriptExecutor {
   }
 
   /**
-   * 更新进度
+   * 设置总步骤数，启用基于步骤的进度管理
    */
-  protected updateProgress(progress: number): void {
+  protected setTotalSteps(total: number): void {
+    this.totalSteps = total;
+    this.currentStep = 0;
+    this.autoProgressEnabled = true;
+  }
+
+  /**
+   * 更新进度
+   * @param progressOrCurrentStep 进度百分比(0-100) 或当前步骤数
+   * @param totalSteps 总步骤数（可选，如果提供则使用基于步骤的进度计算）
+   */
+  protected updateProgress(progressOrCurrentStep?: number, totalSteps?: number): void {
+    let progress: number;
+
+    if (progressOrCurrentStep === undefined) {
+      // 无参数调用：自动递增步骤
+      if (this.autoProgressEnabled && this.totalSteps > 0) {
+        this.currentStep = Math.min(this.currentStep + 1, this.totalSteps);
+        progress = Math.floor((this.currentStep / this.totalSteps) * 100);
+      } else {
+        // 如果没有设置总步骤数，默认递增5%
+        progress = Math.min(this.execution.progress + 5, 95);
+      }
+    } else if (totalSteps !== undefined) {
+      // 两个参数：基于步骤的进度计算
+      this.currentStep = progressOrCurrentStep;
+      this.totalSteps = totalSteps;
+      this.autoProgressEnabled = true;
+      progress = Math.floor((this.currentStep / this.totalSteps) * 100);
+    } else {
+      // 单个参数：直接设置进度百分比
+      progress = progressOrCurrentStep;
+      // 如果设置了具体进度，禁用自动进度
+      if (progress >= 0 && progress <= 100) {
+        this.autoProgressEnabled = false;
+      }
+    }
+
     this.execution.progress = Math.max(0, Math.min(100, progress));
     this.onProgress(this.execution.progress);
   }
@@ -86,7 +128,11 @@ export abstract class ScriptExecutor {
       this.execution.status = 'completed';
       this.execution.endTime = new Date();
       this.execution.result = result;
-      this.updateProgress(100);
+
+      // 只有在进度未达到100%时才设置为100%
+      if (this.execution.progress < 100) {
+        this.updateProgress(100);
+      }
       this.log('debug', '脚本执行完成');
 
     } catch (error) {
