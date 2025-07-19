@@ -168,40 +168,6 @@ const ALL_SCRIPT_CONFIGS: ScriptConfig[] = [
     ]
   },
   {
-    id: 'move_single_media',
-    disabled: true,
-    name: '移动单个视频',
-    description: '将指定视频从一个收藏夹移动到另一个收藏夹',
-    category: 'operation',
-    isRunning: false,
-    parameters: [
-      {
-        key: 'mediaId',
-        label: '视频ID',
-        type: 'text',
-        defaultValue: '',
-        required: true,
-        description: '要移动的视频ID（支持BV号或AV号）'
-      },
-      {
-        key: 'fromFavorite',
-        label: '源收藏夹ID',
-        type: 'number',
-        defaultValue: '',
-        required: true,
-        description: '视频当前所在的收藏夹ID'
-      },
-      {
-        key: 'toFavorite',
-        label: '目标收藏夹ID',
-        type: 'number',
-        defaultValue: '',
-        required: true,
-        description: '要移动到的收藏夹ID'
-      }
-    ]
-  },
-  {
     id: 'delete_timeout_lottery',
     name: '删除过期抽奖动态',
     description: '删除已过期的抽奖动态（仅限官方抽奖工具）',

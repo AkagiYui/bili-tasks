@@ -1,5 +1,5 @@
 import { ScriptExecutor } from './base';
-import { delay, containsAnyKeyword } from '@/utils/helpers';
+import { containsAnyKeyword } from '@/utils/helpers';
 import {
   getToViewList,
   getFavoriteResourceList,
@@ -407,59 +407,6 @@ export class MoveFavoriteExecutor extends ScriptExecutor {
       
     } catch (error) {
       this.log('error', `操作失败: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
-    }
-  }
-}
-
-/**
- * 移动单个视频执行器
- */
-export class MoveSingleMediaExecutor extends ScriptExecutor {
-  public async execute(parameters: Record<string, any>): Promise<any> {
-    const { mediaId, fromFavorite, toFavorite } = parameters;
-    
-    if (!mediaId || !fromFavorite || !toFavorite) {
-      throw new Error('请输入视频ID、源收藏夹ID和目标收藏夹ID');
-    }
-
-    this.log('info', `开始移动视频 ${mediaId} 从收藏夹 ${fromFavorite} 到收藏夹 ${toFavorite}`);
-    this.updateProgress(20);
-
-    try {
-      // 解析视频ID
-      let videoId: number;
-      let videoType = 2; // 默认为视频类型
-      
-      if (mediaId.startsWith('BV')) {
-        // BV号需要转换为AV号
-        const { bv2av } = await import('../utils/bvConverter');
-        videoId = bv2av(mediaId);
-      } else if (mediaId.startsWith('av')) {
-        videoId = parseInt(mediaId.slice(2));
-      } else {
-        videoId = parseInt(mediaId);
-      }
-
-      if (isNaN(videoId)) {
-        throw new Error('无效的视频ID格式');
-      }
-
-      this.updateProgress(50);
-
-      await moveToFavorite(
-        fromFavorite, 
-        toFavorite, 
-        [{ id: videoId, type: videoType }]
-      );
-
-      this.updateProgress(100);
-      this.log('success', `视频移动成功: ${mediaId}`);
-      
-      return { mediaId, fromFavorite, toFavorite, success: true };
-      
-    } catch (error) {
-      this.log('error', `移动失败: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }

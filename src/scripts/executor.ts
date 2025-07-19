@@ -4,7 +4,6 @@ import {
   MoveShortestToToviewExecutor,
   AddToviewToFavoriteExecutor,
   MoveFavoriteExecutor,
-  MoveSingleMediaExecutor,
   DeleteTimeoutLotteryExecutor,
   ClearToviewExecutor,
   BvAvConverterExecutor,
@@ -30,8 +29,6 @@ export function createScriptExecutor(
       return new AddToviewToFavoriteExecutor(scriptId, onLog, onProgress);
     case 'move_favorite_to_another':
       return new MoveFavoriteExecutor(scriptId, onLog, onProgress);
-    case 'move_single_media':
-      return new MoveSingleMediaExecutor(scriptId, onLog, onProgress);
     case 'delete_timeout_lottery':
       return new DeleteTimeoutLotteryExecutor(scriptId, onLog, onProgress);
     case 'clear_toview':
