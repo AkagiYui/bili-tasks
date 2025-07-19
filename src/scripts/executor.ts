@@ -1,6 +1,4 @@
 import { LogEntry, ScriptExecution } from '../types';
-import { delay } from '../utils/helpers';
-import { av2bv, bv2av, isValidBvid, isValidAid } from '../utils/bvConverter';
 import { ScriptExecutor } from './base';
 import {
   MoveShortestToToviewExecutor,
@@ -8,135 +6,10 @@ import {
   MoveFavoriteExecutor,
   MoveSingleMediaExecutor,
   DeleteTimeoutLotteryExecutor,
-  ClearToviewExecutor
+  ClearToviewExecutor,
+  BvAvConverterExecutor,
+  VideoInfoExecutor
 } from './executors';
-
-
-
-/**
- * BV/AV号转换执行器
- */
-export class BvAvConverterExecutor extends ScriptExecutor {
-  public async execute(parameters: Record<string, any>): Promise<any> {
-    const { videoId } = parameters;
-
-    if (!videoId) {
-      throw new Error('请输入视频ID');
-    }
-
-    this.log('info', `开始转换视频ID: ${videoId}`);
-    this.updateProgress(20);
-
-    try {
-      let result: { input: string; output: string; type: string };
-
-      if (videoId.startsWith('BV')) {
-        if (!isValidBvid(videoId)) {
-          throw new Error('无效的BV号格式');
-        }
-        const aid = bv2av(videoId);
-        result = {
-          input: videoId,
-          output: `av${aid}`,
-          type: 'BV → AV'
-        };
-        this.log('success', `转换成功: ${videoId} → av${aid}`);
-      } else if (videoId.startsWith('av')) {
-        const aid = parseInt(videoId.slice(2));
-        if (!isValidAid(aid)) {
-          throw new Error('无效的AV号格式');
-        }
-        const bvid = av2bv(aid);
-        result = {
-          input: videoId,
-          output: bvid,
-          type: 'AV → BV'
-        };
-        this.log('success', `转换成功: ${videoId} → ${bvid}`);
-      } else {
-        // 尝试从数字解析为AV号
-        const aid = parseInt(videoId);
-        if (isValidAid(aid)) {
-          const bvid = av2bv(aid);
-          result = {
-            input: `av${aid}`,
-            output: bvid,
-            type: 'AV → BV'
-          };
-          this.log('success', `转换成功: av${aid} → ${bvid}`);
-        } else {
-          throw new Error('无法识别的视频ID格式，请输入BV号或AV号');
-        }
-      }
-
-      this.updateProgress(100);
-      return result;
-    } catch (error) {
-      this.log('error', `转换失败: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
-    }
-  }
-}
-
-/**
- * 视频信息获取执行器
- */
-export class VideoInfoExecutor extends ScriptExecutor {
-  public async execute(parameters: Record<string, any>): Promise<any> {
-    const { videoIds } = parameters;
-
-    if (!videoIds) {
-      throw new Error('请输入视频ID列表');
-    }
-
-    const idList = videoIds.split('\n').filter((id: string) => id.trim()).map((id: string) => id.trim());
-    if (idList.length === 0) {
-      throw new Error('请输入至少一个视频ID');
-    }
-
-    this.log('info', `开始获取 ${idList.length} 个视频的信息`);
-    this.updateProgress(10);
-
-    const results: any[] = [];
-    const total = idList.length;
-
-    for (let i = 0; i < total; i++) {
-      this.checkShouldStop();
-
-      const videoId = idList[i];
-      this.log('info', `正在处理: ${videoId} (${i + 1}/${total})`);
-
-      try {
-        // 这里应该调用实际的API获取视频信息
-        // 由于API限制，这里使用模拟数据
-        await delay(500); // 模拟API调用延迟
-
-        const info = {
-          id: videoId,
-          title: `视频标题 - ${videoId}`,
-          duration: Math.floor(Math.random() * 3600),
-          author: '作者名称',
-          view: Math.floor(Math.random() * 100000),
-          like: Math.floor(Math.random() * 10000),
-        };
-
-        results.push(info);
-        this.log('success', `获取成功: ${videoId} - ${info.title}`);
-      } catch (error) {
-        this.log('error', `获取失败: ${videoId} - ${error instanceof Error ? error.message : String(error)}`);
-        results.push({
-          id: videoId,
-          error: error instanceof Error ? error.message : String(error)
-        });
-      }
-
-      this.updateProgress(10 + (i + 1) / total * 90);
-    }
-
-    this.log('info', `处理完成，成功: ${results.filter(r => !r.error).length}，失败: ${results.filter(r => r.error).length}`);
-    return { results, total: results.length };
-  }
-}
 
 /**
  * 真实脚本执行器工厂
@@ -193,9 +66,9 @@ export class ScriptExecutionManager {
   ): Promise<ScriptExecution> {
     // 检查是否已有同类型脚本在运行
     const existingExecutor = Array.from(this.executors.values())
-      .find(executor => executor.getExecution().scriptId === scriptId && 
-             executor.getExecution().status === 'running');
-    
+      .find(executor => executor.getExecution().scriptId === scriptId &&
+        executor.getExecution().status === 'running');
+
     if (existingExecutor) {
       throw new Error('该脚本已在运行中，请等待完成或停止后再试');
     }
@@ -226,14 +99,14 @@ export class ScriptExecutionManager {
    */
   public stopScript(scriptId: string): boolean {
     const executor = Array.from(this.executors.values())
-      .find(executor => executor.getExecution().scriptId === scriptId && 
-             executor.getExecution().status === 'running');
-    
+      .find(executor => executor.getExecution().scriptId === scriptId &&
+        executor.getExecution().status === 'running');
+
     if (executor) {
       executor.stop();
       return true;
     }
-    
+
     return false;
   }
 
