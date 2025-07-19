@@ -164,6 +164,9 @@ export interface AppState {
   logs: LogEntry[];
   selectedScript: string | null;
   isModalOpen: boolean;
+  favoriteList: FavoriteList | null;
+  favoriteListLoading: boolean;
+  favoriteListError: string | null;
 }
 
 // 导出所有类型

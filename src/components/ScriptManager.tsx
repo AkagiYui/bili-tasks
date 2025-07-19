@@ -17,6 +17,7 @@ import {
   ResizeState,
   ResizeConfig
 } from '../utils/resizer';
+import { getFavoriteList } from '../api/bili';
 import { GM_setValue, GM_getValue } from '$';
 import './ScriptManager.css';
 
@@ -28,6 +29,9 @@ export function ScriptManager(): JSX.Element {
     logs: [],
     selectedScript: null,
     isModalOpen: true,
+    favoriteList: null,
+    favoriteListLoading: false,
+    favoriteListError: null,
   }));
 
   // 拖拽调整相关状态
@@ -82,7 +86,36 @@ export function ScriptManager(): JSX.Element {
     } catch (error) {
       console.warn('Failed to load saved panel ratio:', error);
     }
+
+    // 获取收藏夹列表
+    loadFavoriteList();
   }, []);
+
+  // 获取收藏夹列表的函数
+  const loadFavoriteList = async () => {
+    setAppState(prev => ({
+      ...prev,
+      favoriteListLoading: true,
+      favoriteListError: null
+    }));
+
+    try {
+      const favoriteList = await getFavoriteList();
+      setAppState(prev => ({
+        ...prev,
+        favoriteList,
+        favoriteListLoading: false
+      }));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '获取收藏夹列表失败';
+      setAppState(prev => ({
+        ...prev,
+        favoriteListLoading: false,
+        favoriteListError: errorMessage
+      }));
+      console.error('Failed to load favorite list:', error);
+    }
+  };
 
   // 保存日志到GM存储
   useEffect(() => {
@@ -299,6 +332,10 @@ export function ScriptManager(): JSX.Element {
                   onStop={handleStopScript}
                   isRunning={script.isRunning}
                   progress={getScriptProgress(script.id)}
+                  favoriteList={appState.favoriteList}
+                  favoriteListLoading={appState.favoriteListLoading}
+                  favoriteListError={appState.favoriteListError}
+                  onRetryFavoriteList={loadFavoriteList}
                 />
               ))}
             </div>
@@ -315,6 +352,10 @@ export function ScriptManager(): JSX.Element {
                   onStop={handleStopScript}
                   isRunning={script.isRunning}
                   progress={getScriptProgress(script.id)}
+                  favoriteList={appState.favoriteList}
+                  favoriteListLoading={appState.favoriteListLoading}
+                  favoriteListError={appState.favoriteListError}
+                  onRetryFavoriteList={loadFavoriteList}
                 />
               ))}
             </div>

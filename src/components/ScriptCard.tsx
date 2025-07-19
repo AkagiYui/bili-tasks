@@ -1,6 +1,6 @@
 import { JSX } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
-import { ScriptConfig, ScriptParameter } from '../types';
+import { ScriptConfig, ScriptParameter, FavoriteList } from '../types';
 import { GM_setValue, GM_getValue } from '$';
 import './ScriptCard.css';
 
@@ -10,6 +10,10 @@ interface ScriptCardProps {
   onStop: (scriptId: string) => void;
   isRunning: boolean;
   progress?: number;
+  favoriteList?: FavoriteList | null;
+  favoriteListLoading?: boolean;
+  favoriteListError?: string | null;
+  onRetryFavoriteList?: () => void;
 }
 
 export function ScriptCard({
@@ -17,10 +21,15 @@ export function ScriptCard({
   onExecute,
   onStop,
   isRunning,
-  progress = 0
+  progress = 0,
+  favoriteList,
+  favoriteListLoading = false,
+  favoriteListError,
+  onRetryFavoriteList
 }: ScriptCardProps): JSX.Element {
   const [parameters, setParameters] = useState<Record<string, any>>({});
   const [isExpanded, setIsExpanded] = useState(false);
+  const [focusedFavoriteInputs, setFocusedFavoriteInputs] = useState<Set<string>>(new Set());
 
   // 从GM存储加载参数
   useEffect(() => {
@@ -83,6 +92,79 @@ export function ScriptCard({
     onStop(script.id);
   };
 
+  // 判断参数是否为收藏夹ID
+  const isFavoriteIdParameter = (param: ScriptParameter): boolean => {
+    return param.type === 'number' &&
+           (param.label.includes('收藏夹ID') ||
+            param.key.toLowerCase().includes('favorite'));
+  };
+
+  // 获取排序后的收藏夹选项
+  const getFavoriteOptions = () => {
+    if (!favoriteList?.list) return [];
+
+    return favoriteList.list
+      .map(fav => ({
+        value: `${fav.title}(${fav.fid})`, // value设置为显示格式
+        fid: fav.fid, // 保留原始ID用于提取
+        title: fav.title
+      }))
+      .sort((a, b) => a.value.localeCompare(b.value));
+  };
+
+  // 根据ID查找收藏夹标题
+  const getFavoriteTitleById = (fid: number): string | null => {
+    if (!favoriteList?.list) return null;
+    const favorite = favoriteList.list.find(fav => fav.fid === fid);
+    return favorite ? favorite.title : null;
+  };
+
+  // 格式化显示值（失去焦点时使用）
+  const formatDisplayValue = (value: number): string => {
+    if (!value) return '';
+    const title = getFavoriteTitleById(value);
+    return title ? `${title}(${value})` : value.toString();
+  };
+
+  // 从格式化字符串中提取ID
+  const extractIdFromFormattedValue = (formattedValue: string): number | null => {
+    // 尝试直接解析为数字
+    const directNumber = parseInt(formattedValue);
+    if (!isNaN(directNumber) && directNumber.toString() === formattedValue) {
+      return directNumber;
+    }
+
+    // 尝试从 "标题(ID)" 格式中提取ID
+    const match = formattedValue.match(/\((\d+)\)$/);
+    if (match) {
+      return parseInt(match[1]);
+    }
+
+    return null;
+  };
+
+  // 处理收藏夹输入框焦点事件
+  const handleFavoriteInputFocus = (paramKey: string) => {
+    setFocusedFavoriteInputs(prev => new Set(prev).add(paramKey));
+  };
+
+  const handleFavoriteInputBlur = (paramKey: string) => {
+    setFocusedFavoriteInputs(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(paramKey);
+      return newSet;
+    });
+  };
+
+  // 获取输入框显示值
+  const getFavoriteInputDisplayValue = (paramKey: string, value: number): string => {
+    const isFocused = focusedFavoriteInputs.has(paramKey);
+    if (isFocused || !value) {
+      return value ? value.toString() : '';
+    }
+    return formatDisplayValue(value);
+  };
+
   const renderParameterInput = (param: ScriptParameter) => {
     const value = parameters[param.key];
 
@@ -100,6 +182,60 @@ export function ScriptCard({
         );
 
       case 'number':
+        // 如果是收藏夹ID参数，渲染为可编辑的下拉选择框
+        if (isFavoriteIdParameter(param)) {
+          const favoriteOptions = getFavoriteOptions();
+          const displayValue = getFavoriteInputDisplayValue(param.key, value);
+
+          return (
+            <div class="favorite-selector">
+              <input
+                type="text"
+                value={displayValue}
+                onChange={(e) => {
+                  const inputValue = (e.target as HTMLInputElement).value;
+                  const extractedId = extractIdFromFormattedValue(inputValue);
+                  if (extractedId !== null) {
+                    handleParameterChange(param.key, extractedId);
+                  }
+                }}
+                onFocus={() => handleFavoriteInputFocus(param.key)}
+                onBlur={() => handleFavoriteInputBlur(param.key)}
+                placeholder={param.placeholder || '输入收藏夹ID或从下拉列表选择'}
+                disabled={isRunning}
+                class="script-input favorite-input"
+                list={`favorites-${script.id}-${param.key}`}
+              />
+              <datalist id={`favorites-${script.id}-${param.key}`}>
+                {favoriteOptions.map(option => (
+                  <option key={option.fid} value={option.value} />
+                ))}
+              </datalist>
+              {favoriteListLoading && (
+                <div class="favorite-loading">
+                  <span>正在加载收藏夹列表...</span>
+                </div>
+              )}
+              {favoriteListError && (
+                <div class="favorite-error">
+                  <span>加载失败: {favoriteListError}</span>
+                  {onRetryFavoriteList && (
+                    <button
+                      type="button"
+                      class="retry-button"
+                      onClick={onRetryFavoriteList}
+                      disabled={isRunning}
+                    >
+                      重试
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        // 普通数字输入框
         return (
           <input
             type="number"

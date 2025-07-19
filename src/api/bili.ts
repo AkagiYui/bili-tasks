@@ -1,5 +1,5 @@
 import { biliApiClient } from './client';
-import { VideoInfo, FavoriteInfo, ToViewInfo, BiliApiResponse, FavoriteList } from '../types';
+import { VideoInfo, FavoriteInfo, ToViewInfo, FavoriteList } from '../types';
 
 /**
  * 获取CSRF Token（从cookie中获取bili_jct）
