@@ -139,6 +139,10 @@
   border-left-color: #4CAF50;
 }
 
+.log-entry.debug {
+  border-left-color: #9c27b0;
+}
+
 .log-meta {
   display: flex;
   align-items: center;
@@ -188,27 +192,80 @@
   color: #c8e6c9;
 }
 
+.log-entry.debug .log-message {
+  color: #e1bee7;
+}
+
 .log-footer {
   padding: 16px 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.05);
 }
 
-.log-legend {
+.log-filters {
   display: flex;
-  gap: 16px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
-.legend-item {
+.filter-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-button {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.8rem;
+  padding: 6px 10px;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
 }
 
-.legend-icon {
+.filter-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.filter-button.active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.filter-button.info.active {
+  border-color: #2196f3;
+  background: rgba(33, 150, 243, 0.2);
+}
+
+.filter-button.success.active {
+  border-color: #4caf50;
+  background: rgba(76, 175, 80, 0.2);
+}
+
+.filter-button.warn.active {
+  border-color: #ff9800;
+  background: rgba(255, 152, 0, 0.2);
+}
+
+.filter-button.error.active {
+  border-color: #f44336;
+  background: rgba(244, 67, 54, 0.2);
+}
+
+.filter-button.debug.active {
+  border-color: #9c27b0;
+  background: rgba(156, 39, 176, 0.2);
+}
+
+.filter-icon {
   font-size: 0.9rem;
 }
 
@@ -253,9 +310,19 @@
     font-size: 0.85rem;
   }
   
-  .log-legend {
-    flex-wrap: wrap;
-    gap: 12px;
+  .log-filters {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .filter-buttons {
+    gap: 6px;
+  }
+
+  .filter-button {
+    font-size: 0.75rem;
+    padding: 4px 8px;
   }
   
   .log-footer {

@@ -27,13 +27,16 @@ export class BvAvConverterExecutor extends ScriptExecutor {
     }
 
     this.log('info', `开始转换视频ID: ${videoId}`);
+    this.log('debug', `输入参数: ${JSON.stringify(parameters)}`);
     this.updateProgress(20);
 
     try {
       let result: { input: string; output: string; type: string };
 
       if (videoId.startsWith('BV')) {
+        this.log('debug', `检测到BV号格式，准备转换为AV号`);
         const aid = bv2av(videoId);
+        this.log('debug', `转换结果: BV号 ${videoId} → AV号 ${aid}`);
         result = {
           input: videoId,
           output: `av${aid}`,

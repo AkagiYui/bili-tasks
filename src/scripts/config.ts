@@ -3,7 +3,7 @@ import { ScriptConfig } from '../types';
 /**
  * 所有脚本的配置定义
  */
-export const SCRIPT_CONFIGS: ScriptConfig[] = [
+const ALL_SCRIPT_CONFIGS: ScriptConfig[] = [
   // 工具脚本
   {
     id: 'bv2av',
@@ -237,7 +237,7 @@ export const SCRIPT_CONFIGS: ScriptConfig[] = [
   {
     id: 'clear_toview',
     name: '清空稍后再看',
-    description: '删除稍后再看中的所有视频',
+    description: '由于新版「稍后再看」移除了清空按钮，特出该脚本以删除所有「稍后再看」的视频。',
     category: 'operation',
     isRunning: false,
     parameters: [
@@ -251,4 +251,9 @@ export const SCRIPT_CONFIGS: ScriptConfig[] = [
       }
     ]
   }
-].filter(script => !script.disabled);
+];
+
+/**
+ * 导出的脚本配置列表（过滤掉禁用的脚本）
+ */
+export const SCRIPT_CONFIGS: ScriptConfig[] = ALL_SCRIPT_CONFIGS.filter(script => !script.disabled);

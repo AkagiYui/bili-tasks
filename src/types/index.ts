@@ -153,7 +153,7 @@ export interface ScriptExecution {
 export interface LogEntry {
   id: string;
   timestamp: Date;
-  level: 'info' | 'warn' | 'error' | 'success';
+  level: 'info' | 'warn' | 'error' | 'success' | 'debug';
   message: string;
   scriptId?: string;
 }
