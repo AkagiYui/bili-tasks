@@ -14,6 +14,7 @@ import {
   getFavoriteInfo
 } from '@/api/bili';
 import { av2bv, bv2av, isValidAid } from '@/utils/bvConverter';
+import { VideoInfo } from '@/types';
 
 /**
  * BV/AV号转换执行器
@@ -354,64 +355,83 @@ export class MoveFavoriteExecutor extends ScriptExecutor {
     this.log('info', `开始从收藏夹 ${fromFavorite} 移动视频到收藏夹 ${toFavorite}`);
     this.updateProgress(10);
 
+    // 考虑以后能够使用更多的过滤参数，这里逐页获取视频列表
+    const keywords: string[] = onlyWithKeywords ? onlyWithKeywords.split(',').map((k: string) => k.trim()) : [];
+    const maxCount = upTo || 1000;
+    const pageSize = 20;
+
+    const originVideoInfos: VideoInfo[] = [];
+    const willMoveVideoInfos: VideoInfo[] = [];
+
+    // 获取源收藏夹所有视频
     try {
-      const keywords = onlyWithKeywords ? onlyWithKeywords.split(',').map((k: string) => k.trim()) : [];
-      const maxCount = upTo || 1000;
-
-      let movedCount = 0;
+      this.log('info', `正在获取源收藏夹所有视频...`);
       let pageIndex = 1;
-      const pageSize = 20;
-
-      while (movedCount < maxCount) {
+      while (true) {
         this.checkShouldStop();
-
-        this.log('info', `正在获取第 ${pageIndex} 页源收藏夹资源...`);
-        const favoriteData = await getFavoriteResourceList(fromFavorite, pageIndex, pageSize);
-
-        if (!favoriteData.medias || favoriteData.medias.length === 0) {
-          this.log('info', '已处理完所有视频');
-          break;
-        }
-
-        // 过滤视频
-        let candidates = favoriteData.medias;
-        if (keywords.length > 0) {
-          candidates = candidates.filter(video =>
-            containsAnyKeyword(video.title, keywords)
-          );
-        }
-
-        for (const video of candidates) {
-          if (movedCount >= maxCount) break;
-
-          this.checkShouldStop();
-
-          try {
-            await moveToFavorite(
-              fromFavorite,
-              toFavorite,
-              [{ id: video.id, type: video.type }]
-            );
-            movedCount++;
-            this.log('success', `已移动: ${video.title}`);
-
-          } catch (error) {
-            this.log('error', `移动失败: ${video.title} - ${error instanceof Error ? error.message : String(error)}`);
-          }
-
-          this.updateProgress(10 + (movedCount / maxCount) * 80);
-        }
-
+        const pageInfo = await getFavoriteResourceList(fromFavorite, pageIndex, pageSize);
+        originVideoInfos.push(...pageInfo.medias);
+        this.updateProgress(20 + (pageIndex / 10) * 70);
+        this.log('debug', `已获取 ${originVideoInfos.length} 个视频`);
+        if (!pageInfo.has_more) break;
         pageIndex++;
       }
-
-      this.log('success', `操作完成，共移动 ${movedCount} 个视频`);
-      return { moved: movedCount, maxCount };
-
     } catch (error) {
-      this.log('error', `操作失败: ${error instanceof Error ? error.message : String(error)}`);
+      this.log('error', `获取源收藏夹视频失败: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
+
+    // 过滤视频
+    this.log('debug', `正在过滤视频...`);
+    for (const video of originVideoInfos) {
+      if (keywords.length > 0 && !containsAnyKeyword(video.title, keywords)) {
+        continue;
+      }
+      willMoveVideoInfos.push(video);
+      if (willMoveVideoInfos.length >= maxCount) break;
+    }
+    let log = `过滤完成，共 ${willMoveVideoInfos.length} 个视频符合条件`;
+    log += `\n将要移动的视频列表: ${willMoveVideoInfos.map(v => v.title).join(', ')}`;
+    this.log('debug', log);
+    this.updateProgress(30);
+
+    // 获取目标收藏夹信息
+    try {
+      this.log('info', `正在获取目标收藏夹信息...`);
+      this.checkShouldStop();
+      const targetFavoriteInfo = await getFavoriteInfo(toFavorite);
+      const currentCount = targetFavoriteInfo.media_count;
+      const remainingSpace = 1000 - currentCount;
+      log = `目标收藏夹当前视频数量: ${currentCount}/1000`
+      log += `\n剩余空间: ${remainingSpace}`;
+      this.log('info', log);
+      // 判断是否有足够的空间
+      if (willMoveVideoInfos.length > remainingSpace) {
+        this.log('error', `目标收藏夹空间不足，无法移动所有视频。当前: ${currentCount}，待添加: ${willMoveVideoInfos.length}，剩余空间: ${remainingSpace}`);
+        throw new Error('目标收藏夹空间不足，无法移动所有视频');
+      }
+    } catch (error) {
+      this.log('error', `获取目标收藏夹信息失败: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
+    }
+    this.updateProgress(40);
+
+    // 移动视频
+    this.log('info', `正在移动视频...`);
+    try {
+      this.checkShouldStop();
+      await moveToFavorite(
+        fromFavorite,
+        toFavorite,
+        willMoveVideoInfos.map(v => ({ id: v.id, type: v.type }))
+      );
+    } catch (error) {
+      this.log('error', `视频移动失败: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
+    }
+
+    this.log('success', `操作完成，共移动 ${willMoveVideoInfos.length} 个视频`);
+    return { moved: willMoveVideoInfos.length, maxCount };
   }
 }
 
@@ -464,7 +484,7 @@ export class DeleteTimeoutLotteryExecutor extends ScriptExecutor {
           log += `\n发布时间：${new Date(publishTimestamp * 1000).toLocaleString('zh-CN')}`;
           log += `\n动态类型: ${dynamicType}`;
           log += `\n动态内容: ${dynamicText}`;
-          
+
           // 跳过非转发动态
           if (dynamicType !== 'DYNAMIC_TYPE_FORWARD') {
             log += `\n非转发动态，跳过`;
