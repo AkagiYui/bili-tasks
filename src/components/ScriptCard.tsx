@@ -189,23 +189,44 @@ export function ScriptCard({
 
           return (
             <div class="favorite-selector">
-              <input
-                type="text"
-                value={displayValue}
-                onChange={(e) => {
-                  const inputValue = (e.target as HTMLInputElement).value;
-                  const extractedId = extractIdFromFormattedValue(inputValue);
-                  if (extractedId !== null) {
-                    handleParameterChange(param.key, extractedId);
-                  }
-                }}
-                onFocus={() => handleFavoriteInputFocus(param.key)}
-                onBlur={() => handleFavoriteInputBlur(param.key)}
-                placeholder={param.placeholder || '输入收藏夹ID或从下拉列表选择'}
-                disabled={isRunning}
-                class="script-input favorite-input"
-                list={`favorites-${script.id}-${param.key}`}
-              />
+              <div class="favorite-input-wrapper">
+                <input
+                  type="text"
+                  value={displayValue}
+                  onChange={(e) => {
+                    const inputValue = (e.target as HTMLInputElement).value;
+                    const extractedId = extractIdFromFormattedValue(inputValue);
+                    if (extractedId !== null) {
+                      handleParameterChange(param.key, extractedId);
+                    }
+                  }}
+                  onFocus={() => handleFavoriteInputFocus(param.key)}
+                  onBlur={() => handleFavoriteInputBlur(param.key)}
+                  placeholder={param.placeholder || '输入收藏夹ID或从下拉列表选择'}
+                  disabled={isRunning}
+                  class="script-input favorite-input"
+                  list={`favorites-${script.id}-${param.key}`}
+                />
+                {value && !isRunning && (
+                  <button
+                    type="button"
+                    class="favorite-clear-button"
+                    onClick={() => handleParameterChange(param.key, '')}
+                    title="清空收藏夹ID"
+                    aria-label="清空收藏夹ID"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M18 6L6 18M6 6L18 18"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
               <datalist id={`favorites-${script.id}-${param.key}`}>
                 {favoriteOptions.map(option => (
                   <option key={option.fid} value={option.value} />

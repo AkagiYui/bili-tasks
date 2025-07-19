@@ -260,8 +260,51 @@
   position: relative;
 }
 
+.favorite-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .favorite-input {
   width: 100%;
+  padding-right: 36px; /* 为清空按钮留出空间 */
+}
+
+.favorite-clear-button {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 1;
+}
+
+.favorite-clear-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.favorite-clear-button:active {
+  transform: translateY(-50%) scale(0.95);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.favorite-clear-button svg {
+  width: 14px;
+  height: 14px;
+  display: block;
 }
 
 .favorite-loading,
