@@ -13,14 +13,18 @@ export default defineConfig({
         description: '可以一键执行一系列操作。',
         icon: 'https://static.hdslb.com/images/favicon.ico',
         namespace: 'https://github.com/AkagiYui/UserScript',
-        match: ['https://space.bilibili.com/*/favlist*'],
+        match: [
+          'https://space.bilibili.com/*/favlist*',
+          'https://www.bilibili.com/list/ml*',
+          'https://www.bilibili.com/list/watchlater*',
+        ],
         supportURL: 'https://github.com/AkagiYui/UserScript/issues',
         homepage: 'https://github.com/AkagiYui',
         author: 'AkagiYui',
         license: 'MIT',
         version: '0.0.1',
       },
-      
+
       build: {
         externalGlobals: {
           preact: cdn.jsdelivr('preact', 'dist/preact.min.js'),
