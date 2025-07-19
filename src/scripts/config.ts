@@ -169,6 +169,7 @@ export const SCRIPT_CONFIGS: ScriptConfig[] = [
   },
   {
     id: 'move_single_media',
+    disabled: true,
     name: '移动单个视频',
     description: '将指定视频从一个收藏夹移动到另一个收藏夹',
     category: 'operation',
@@ -250,4 +251,4 @@ export const SCRIPT_CONFIGS: ScriptConfig[] = [
       }
     ]
   }
-];
+].filter(script => !script.disabled);

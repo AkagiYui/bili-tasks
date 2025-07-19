@@ -118,6 +118,7 @@ export interface FavoriteList {
 // 脚本相关类型
 export interface ScriptConfig {
   id: string;
+  disabled?: boolean;
   name: string;
   description: string;
   category: 'tool' | 'operation';
