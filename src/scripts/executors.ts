@@ -273,18 +273,18 @@ export class AddToviewToFavoriteExecutor extends ScriptExecutor {
       // 根据参数决定是否进行容量检查
       if (disableSpaceCheck) {
         this.log('info', '已关闭空间检查，将跳过容量验证');
-        this.log('warn', '注意：跳过容量检查可能导致添加失败，建议仅在添加重复视频时使用');
       } else {
         // 获取收藏夹当前信息，检查容量
-        this.log('info', '正在检查收藏夹容量...');
+        this.log('debug', '正在检查收藏夹容量...');
         const favoriteInfo = await getFavoriteInfo(favoriteId);
         const currentCount = favoriteInfo.media_count;
         const toAddCount = videosToAdd.length;
         const remainingSpace = 1000 - currentCount;
 
-        this.log('info', `收藏夹当前视频数量: ${currentCount}/1000`);
-        this.log('info', `待添加视频数量: ${toAddCount}`);
-        this.log('info', `剩余空间: ${remainingSpace}`);
+        let log = `收藏夹当前视频数量: ${currentCount}/1000`
+        log += `\n待添加视频数量: ${toAddCount}`;
+        log += `\n剩余空间: ${remainingSpace}`;
+        this.log('debug', log);
 
         if (currentCount + toAddCount > 1000) {
           this.log('error', `收藏夹空间不足，无法添加所有视频。当前: ${currentCount}，待添加: ${toAddCount}，剩余空间: ${remainingSpace}`);
@@ -298,21 +298,24 @@ export class AddToviewToFavoriteExecutor extends ScriptExecutor {
       let addedCount = 0;
       const total = videosToAdd.length;
 
-      this.log('info', `开始逐个添加 ${total} 个视频到收藏夹`);
+      this.log('debug', `开始逐个添加 ${total} 个视频到收藏夹`);
 
       for (let i = 0; i < total; i++) {
         this.checkShouldStop();
 
         const video = videosToAdd[i];
-        this.log('info', `正在添加: ${video.title} (${i + 1}/${total})`);
+        let log = `正在添加: ${video.title} (${i + 1}/${total})`
+        this.log('debug', log);
 
         try {
           // 使用正确的API：一个视频添加到一个收藏夹
           await addOrDeleteToFavorite(video.aid, 2, [favoriteId], []);
           addedCount++;
-          this.log('success', `添加成功: ${video.title}`);
+          log += `\n添加成功: ${video.title}`;
+          this.log('success', log);
         } catch (error) {
-          this.log('error', `添加失败: ${video.title} - ${error instanceof Error ? error.message : String(error)}`);
+          log += `\n添加失败: ${error instanceof Error ? error.message : String(error)}`;
+          this.log('error', log);
           throw error;
         }
 

@@ -111,7 +111,7 @@ const ALL_SCRIPT_CONFIGS: ScriptConfig[] = [
         key: 'maxCount',
         label: '最大添加数量',
         type: 'number',
-        defaultValue: 50,
+        defaultValue: 0,
         required: false,
         description: '最多添加多少个视频，0表示全部添加'
       },
