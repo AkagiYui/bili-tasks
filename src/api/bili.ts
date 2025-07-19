@@ -1,6 +1,5 @@
 import { biliApiClient } from './client';
-import { VideoInfo, FavoriteInfo, ToViewInfo, BiliApiResponse } from '../types';
-import { GM_getValue } from '$';
+import { VideoInfo, FavoriteInfo, ToViewInfo, BiliApiResponse, FavoriteList } from '../types';
 
 /**
  * 获取CSRF Token（从cookie中获取bili_jct）
@@ -278,4 +277,19 @@ export async function getVideoInfo(videoId: string): Promise<VideoInfo> {
     bvid: videoId.startsWith('BV') ? videoId : undefined,
     aid: videoId.startsWith('av') ? parseInt(videoId.slice(2)) : undefined,
   };
+}
+
+
+/*
+ * 获取收藏夹列表
+ */
+export async function getFavoriteList(uid?: string): Promise<FavoriteList> {
+  const response = await biliApiClient.get<FavoriteList>(
+    'https://api.bilibili.com/x/v3/fav/folder/created/list-all',
+    { up_mid: uid || getUserId() }
+  );
+  if (response.code !== 0) {
+    throw new Error(`Failed to get favorite list: ${response.message}`);
+  }
+  return response.data;
 }

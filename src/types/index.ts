@@ -102,6 +102,19 @@ export interface ToViewInfo {
   list: VideoInfo[];
 }
 
+export interface FavoriteList {
+  count: number;
+  list: {
+    attr: number;
+    fav_state: number;
+    fid: number;
+    id: number;
+    media_count: number;
+    mid: number;
+    title: string;
+  }[];
+}
+
 // 脚本相关类型
 export interface ScriptConfig {
   id: string;

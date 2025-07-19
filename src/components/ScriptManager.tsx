@@ -289,7 +289,7 @@ export function ScriptManager(): JSX.Element {
           style={{ width: isMobileOrSmallScreen() ? 'auto' : `${panelWidths.leftWidth}px` }}
         >
           <div class="scripts-section">
-            <h2>🔧 工具脚本</h2>
+            <h2>🔧 工具脚本 (输出有效信息)</h2>
             <div class="scripts-list">
               {toolScripts.map(script => (
                 <ScriptCard
@@ -305,7 +305,7 @@ export function ScriptManager(): JSX.Element {
           </div>
 
           <div class="scripts-section">
-            <h2>⚙️ 操作脚本</h2>
+            <h2>⚙️ 操作脚本 (不输出有效信息，在没报错的情况下就达成目标)</h2>
             <div class="scripts-list">
               {operationScripts.map(script => (
                 <ScriptCard
