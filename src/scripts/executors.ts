@@ -11,7 +11,8 @@ import {
   deleteDynamic,
   getLotteryInfo,
   getVideoInfo,
-  getFavoriteInfo
+  getFavoriteInfo,
+  deleteFromFavorite
 } from '@/api/bili';
 import { av2bv, bv2av, isValidAid } from '@/utils/bvConverter';
 import { VideoInfo } from '@/types';
@@ -110,7 +111,6 @@ export class VideoInfoExecutor extends ScriptExecutor {
       this.log('info', `正在处理: ${videoId} (${i + 1}/${total})`);
 
       try {
-        // 调用真实的API获取视频信息
         const info = await getVideoInfo(videoId);
 
         results.push({
@@ -160,86 +160,108 @@ export class MoveShortestToToviewExecutor extends ScriptExecutor {
     this.log('info', `开始从收藏夹 ${favoriteId} 移动最短视频到稍后再看`);
     this.updateProgress(10);
 
+    // 考虑以后能够使用更多的过滤参数，这里逐页获取视频列表
+    const ignoreTitleKeywordList: string[] = ignoreTitleKeywords ? ignoreTitleKeywords.split(',').map((k: string) => k.trim()) : [];
+    const maxCount = upTo || 1000;
+    let needCount = maxCount;
+    const maxDuration = durationThreshold || 0;
+    const ignorePageCount = ignoreFrontPage || 6;
+
+    const originVideoInfos: VideoInfo[] = [];
+    const willMoveVideoInfos: VideoInfo[] = [];
+
+    // 获取稍后再看当前数量
     try {
-      // 获取当前稍后再看数量
+      this.log('info', `正在获取稍后再看当前数量...`);
+      this.checkShouldStop();
       const toviewList = await getToViewList();
       const currentCount = toviewList.count;
-      const targetCount = upTo || 100;
-
-      if (currentCount >= targetCount) {
-        this.log('info', `稍后再看已有 ${currentCount} 个视频，达到目标数量 ${targetCount}`);
-        return { added: 0, currentCount, targetCount };
+      needCount = maxCount - currentCount;
+      let log = `稍后再看当前视频数量: ${currentCount}/1000`
+      log += `\n还需要添加: ${needCount}`;
+      if (needCount <= 0) {
+        log += `\n稍后再看已达到目标数量，无需添加更多视频`;
+        this.log('info', log);
+        return { added: 0, currentCount, needCount };
       }
-
-      const needCount = targetCount - currentCount;
-      this.log('info', `需要添加 ${needCount} 个视频到稍后再看`);
-      this.updateProgress(20);
-
-      // 获取收藏夹资源
-      const ignorePages = ignoreFrontPage || 6;
-      const keywords = ignoreTitleKeywords ? ignoreTitleKeywords.split(',').map((k: string) => k.trim()) : [];
-      const maxDuration = durationThreshold || 0;
-
-      let addedCount = 0;
-      let pageIndex = ignorePages + 1;
-      const pageSize = 20;
-
-      while (addedCount < needCount) {
-        this.checkShouldStop();
-
-        this.log('info', `正在获取第 ${pageIndex} 页收藏夹资源...`);
-        const favoriteData = await getFavoriteResourceList(favoriteId, pageIndex, pageSize);
-
-        if (!favoriteData.medias || favoriteData.medias.length === 0) {
-          this.log('warn', '已到达收藏夹末尾，停止添加');
-          break;
-        }
-
-        // 过滤视频
-        let candidates = favoriteData.medias.filter(video => {
-          // 过滤时长
-          if (maxDuration > 0 && video.duration > maxDuration) {
-            return false;
-          }
-
-          // 过滤关键词
-          if (keywords.length > 0 && containsAnyKeyword(video.title, keywords)) {
-            return false;
-          }
-
-          return true;
-        });
-
-        // 按时长排序，选择最短的
-        candidates.sort((a, b) => a.duration - b.duration);
-
-        for (const video of candidates) {
-          if (addedCount >= needCount) break;
-
-          this.checkShouldStop();
-
-          try {
-            await addToToView(video.id);
-            addedCount++;
-            this.log('success', `已添加: ${video.title} (时长: ${Math.floor(video.duration / 60)}分钟)`);
-
-          } catch (error) {
-            this.log('error', `添加失败: ${video.title} - ${error instanceof Error ? error.message : String(error)}`);
-          }
-
-          this.updateProgress(20 + (addedCount / needCount) * 70);
-        }
-
-        pageIndex++;
-      }
-
-      this.log('success', `操作完成，共添加 ${addedCount} 个视频到稍后再看`);
-      return { added: addedCount, currentCount: currentCount + addedCount, targetCount };
-
+      this.log('info', log);
+      this.updateProgress(40);
     } catch (error) {
-      this.log('error', `操作失败: ${error instanceof Error ? error.message : String(error)}`);
+      this.log('error', `获取稍后再看数量失败: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
+
+    // 获取源收藏夹所有视频
+    try {
+      this.log('info', `正在获取源收藏夹所有视频...`);
+      let pageIndex = 1;
+      const pageSize = 20;
+      while (true) {
+        this.checkShouldStop();
+        if (pageIndex <= ignorePageCount) {
+          this.log('debug', `忽略第 ${pageIndex} 页视频...`);
+          pageIndex++;
+          continue;
+        }
+        const pageInfo = await getFavoriteResourceList(favoriteId, pageIndex, pageSize);
+        originVideoInfos.push(...pageInfo.medias);
+        this.updateProgress(20 + (pageIndex / 10) * 70);
+        this.log('debug', `已获取 ${originVideoInfos.length} 个视频`);
+        if (!pageInfo.has_more) break;
+        pageIndex++;
+      }
+    } catch (error) {
+      this.log('error', `获取源收藏夹视频失败: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
+    }
+
+    // 过滤视频
+    this.log('debug', `正在过滤视频...`);
+    for (const video of originVideoInfos) {
+      if (ignoreTitleKeywordList.length > 0 && containsAnyKeyword(video.title, ignoreTitleKeywordList)) {
+        continue;
+      }
+      if (maxDuration > 0 && video.duration > maxDuration) {
+        continue;
+      }
+      willMoveVideoInfos.push(video);
+      if (willMoveVideoInfos.length >= needCount) break;
+    }
+    let log = `过滤完成，共 ${willMoveVideoInfos.length} 个视频符合条件`;
+    log += `\n将要移动的视频列表: ${willMoveVideoInfos.map(v => v.title).join(', ')}`;
+    this.log('debug', log);
+    this.updateProgress(30);
+
+    // 添加视频到稍后再看
+    this.log('info', `正在添加视频到稍后再看...`);
+    for (let i = 0; i < willMoveVideoInfos.length; i++) {
+      this.checkShouldStop();
+      const video = willMoveVideoInfos[i];
+      this.log('info', `正在添加: ${video.title} (${i + 1}/${willMoveVideoInfos.length})`);
+      try {
+        await addToToView(video.id);
+        this.log('success', `添加成功: ${video.title}`);
+      } catch (error) {
+        this.log('error', `添加失败: ${video.title} - ${error instanceof Error ? error.message : String(error)}`);
+      }
+      this.updateProgress(30 + (i + 1) / willMoveVideoInfos.length * 60);
+    }
+    this.log('success', `共添加 ${willMoveVideoInfos.length} 个视频到稍后再看`);
+
+    // 从收藏夹中删除
+    this.log('info', `正在从收藏夹中删除已移动的视频...`);
+    try {
+      await deleteFromFavorite(
+        favoriteId,
+        willMoveVideoInfos.map(v => ({ id: v.id, type: v.type }))
+      );
+      this.log('success', `删除成功`);
+      this.updateProgress(100);
+    } catch (error) {
+      this.log('error', `删除失败: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
+    }
+    this.log('success', `共删除 ${willMoveVideoInfos.length} 个视频从收藏夹`);
   }
 }
 
@@ -358,7 +380,6 @@ export class MoveFavoriteExecutor extends ScriptExecutor {
     // 考虑以后能够使用更多的过滤参数，这里逐页获取视频列表
     const keywords: string[] = onlyWithKeywords ? onlyWithKeywords.split(',').map((k: string) => k.trim()) : [];
     const maxCount = upTo || 1000;
-    const pageSize = 20;
 
     const originVideoInfos: VideoInfo[] = [];
     const willMoveVideoInfos: VideoInfo[] = [];
@@ -367,6 +388,7 @@ export class MoveFavoriteExecutor extends ScriptExecutor {
     try {
       this.log('info', `正在获取源收藏夹所有视频...`);
       let pageIndex = 1;
+      const pageSize = 20;
       while (true) {
         this.checkShouldStop();
         const pageInfo = await getFavoriteResourceList(fromFavorite, pageIndex, pageSize);

@@ -129,11 +129,11 @@ export async function clearToViewList(): Promise<void> {
  */
 export async function deleteFromFavorite(
   favoriteId: number,
-  resourceIds: Array<{ id: number; type: number }>
+  resourceIds: { id: number; type: number }[]
 ): Promise<void> {
   const resources = resourceIds.map(r => `${r.id}:${r.type}`).join(',');
   const response = await biliApiClient.post(
-    'https://api.bilibili.com/x/v3/fav/resource/del',
+    'https://api.bilibili.com/x/v3/fav/resource/batch-del',
     {
       media_id: favoriteId,
       resources,
