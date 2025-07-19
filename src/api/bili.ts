@@ -260,23 +260,19 @@ export async function getLotteryInfo(dynamicId: string): Promise<any> {
 
 /**
  * 获取视频信息
+ * @param videoId 视频ID，可以是BV号或AV号
  */
 export async function getVideoInfo(videoId: string): Promise<VideoInfo> {
-  const url = `https://www.bilibili.com/video/${videoId}/`;
-  const response = await biliApiClient.get(url);
-
-  // 从HTML中提取标题（简化版本，实际应该解析HTML）
-  const titleMatch = response.toString().match(/<title[^>]*>([^<]+)<\/title>/);
-  const title = titleMatch ? titleMatch[1] : 'Unknown Title';
-
-  return {
-    id: 0, // 需要从其他API获取
-    type: 2,
-    title,
-    duration: 0, // 需要从其他API获取
-    bvid: videoId.startsWith('BV') ? videoId : undefined,
-    aid: videoId.startsWith('av') ? parseInt(videoId.slice(2)) : undefined,
-  };
+  videoId = videoId.trim();
+  const url = `https://api.bilibili.com/x/web-interface/view`
+  const response = await biliApiClient.get(url, {
+    bvid: videoId.toLocaleUpperCase().startsWith('BV') ? videoId : undefined,
+    aid: videoId.toLocaleUpperCase().startsWith('AV') ? parseInt(videoId.slice(2)) : undefined,
+  });
+  if (response.code !== 0) {
+    throw new Error(`Failed to get video info: ${response.message}`);
+  }
+  return response.data;
 }
 
 

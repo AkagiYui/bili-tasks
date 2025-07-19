@@ -9,7 +9,8 @@ import {
   moveToFavorite,
   getDynamicList,
   deleteDynamic,
-  getLotteryInfo
+  getLotteryInfo,
+  getVideoInfo
 } from '../api/bili';
 import { av2bv, bv2av, isValidBvid, isValidAid } from '../utils/bvConverter';
 
@@ -107,20 +108,18 @@ export class VideoInfoExecutor extends ScriptExecutor {
       this.log('info', `正在处理: ${videoId} (${i + 1}/${total})`);
 
       try {
-        // 这里应该调用实际的API获取视频信息
-        // 由于API限制，这里使用模拟数据
-        await delay(500); // 模拟API调用延迟
+        // 调用真实的API获取视频信息
+        const info = await getVideoInfo(videoId);
 
-        const info = {
+        results.push({
           id: videoId,
-          title: `视频标题 - ${videoId}`,
-          duration: Math.floor(Math.random() * 3600),
-          author: '作者名称',
-          view: Math.floor(Math.random() * 100000),
-          like: Math.floor(Math.random() * 10000),
-        };
+          title: info.title,
+          duration: info.duration || 0,
+          bvid: info.bvid,
+          aid: info.aid,
+          type: info.type
+        });
 
-        results.push(info);
         this.log('success', `获取成功: ${videoId} - ${info.title}`);
       } catch (error) {
         this.log('error', `获取失败: ${videoId} - ${error instanceof Error ? error.message : String(error)}`);
@@ -133,8 +132,15 @@ export class VideoInfoExecutor extends ScriptExecutor {
       this.updateProgress(10 + (i + 1) / total * 90);
     }
 
-    this.log('info', `处理完成，成功: ${results.filter(r => !r.error).length}，失败: ${results.filter(r => r.error).length}`);
-    return { results, total: results.length };
+    const successCount = results.filter(r => !r.error).length;
+    const failCount = results.filter(r => r.error).length;
+
+    this.log('success', `视频信息获取任务完成！成功获取 ${successCount} 个视频信息，失败 ${failCount} 个`);
+    if (successCount > 0) {
+      this.log('info', `成功获取的视频：${results.filter(r => !r.error).map(r => r.title).join(', ')}`);
+    }
+
+    return { results, total: results.length, successCount, failCount };
   }
 }
 

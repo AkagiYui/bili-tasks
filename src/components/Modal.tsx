@@ -1,10 +1,34 @@
 import { JSX } from 'preact';
-import { useState } from 'preact/hooks';
+import { useState, useEffect } from 'preact/hooks';
 import { ModalProps } from '../types';
 import './Modal.css';
 
 export function Modal({ isOpen, onClose, children }: ModalProps): JSX.Element | null {
   const [isClosing, setIsClosing] = useState(false);
+
+  // 控制背景滚动
+  useEffect(() => {
+    if (isOpen) {
+      // 保存当前的overflow样式
+      const originalOverflow = document.body.style.overflow;
+      const originalPaddingRight = document.body.style.paddingRight;
+
+      // 获取滚动条宽度
+      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+      // 禁用滚动并补偿滚动条宽度
+      document.body.style.overflow = 'hidden';
+      if (scrollBarWidth > 0) {
+        document.body.style.paddingRight = `${scrollBarWidth}px`;
+      }
+
+      // 清理函数：恢复原有样式
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        document.body.style.paddingRight = originalPaddingRight;
+      };
+    }
+  }, [isOpen]);
 
   const handleClose = () => {
     setIsClosing(true);
