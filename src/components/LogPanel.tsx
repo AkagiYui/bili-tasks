@@ -48,8 +48,8 @@ export function LogPanel({ logs, onClear }: LogPanelProps): JSX.Element {
         <h3>执行日志</h3>
         <div class="log-controls">
           <span class="log-count">{logs.length} 条日志</span>
-          <button 
-            class="clear-button"
+          <button
+            class="log-clear-button"
             onClick={onClear}
             title="清空日志"
           >

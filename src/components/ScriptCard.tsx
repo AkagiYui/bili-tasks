@@ -165,20 +165,48 @@ export function ScriptCard({
     return formatDisplayValue(value);
   };
 
+  // 通用清空按钮组件
+  const renderClearButton = (paramKey: string, hasValue: boolean, className: string = '') => {
+    if (!hasValue || isRunning) return null;
+
+    return (
+      <button
+        type="button"
+        class={`clear-button ${className}`}
+        onClick={() => handleParameterChange(paramKey, '')}
+        title="清空内容"
+        aria-label="清空内容"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M12 4L4 12M4 4L12 12"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    );
+  };
+
   const renderParameterInput = (param: ScriptParameter) => {
     const value = parameters[param.key];
 
     switch (param.type) {
       case 'text':
         return (
-          <input
-            type="text"
-            value={value || ''}
-            onChange={(e) => handleParameterChange(param.key, (e.target as HTMLInputElement).value)}
-            placeholder={param.placeholder}
-            disabled={isRunning}
-            class="script-input"
-          />
+          <div class="input-wrapper">
+            <input
+              type="text"
+              value={value || ''}
+              onChange={(e) => handleParameterChange(param.key, (e.target as HTMLInputElement).value)}
+              placeholder={param.placeholder}
+              disabled={isRunning}
+              class="script-input"
+            />
+            {renderClearButton(param.key, !!(value && value.toString().trim()))}
+          </div>
         );
 
       case 'number':
@@ -207,25 +235,7 @@ export function ScriptCard({
                   class="script-input favorite-input"
                   list={`favorites-${script.id}-${param.key}`}
                 />
-                {value && !isRunning && (
-                  <button
-                    type="button"
-                    class="favorite-clear-button"
-                    onClick={() => handleParameterChange(param.key, '')}
-                    title="清空收藏夹ID"
-                    aria-label="清空收藏夹ID"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M18 6L6 18M6 6L18 18"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </button>
-                )}
+                {renderClearButton(param.key, !!(value && value.toString().trim()), 'clear-button-favorite')}
               </div>
               <datalist id={`favorites-${script.id}-${param.key}`}>
                 {favoriteOptions.map(option => (
@@ -258,14 +268,17 @@ export function ScriptCard({
 
         // 普通数字输入框
         return (
-          <input
-            type="number"
-            value={value || ''}
-            onChange={(e) => handleParameterChange(param.key, Number((e.target as HTMLInputElement).value))}
-            placeholder={param.placeholder}
-            disabled={isRunning}
-            class="script-input"
-          />
+          <div class="input-wrapper">
+            <input
+              type="number"
+              value={value || ''}
+              onChange={(e) => handleParameterChange(param.key, Number((e.target as HTMLInputElement).value))}
+              placeholder={param.placeholder}
+              disabled={isRunning}
+              class="script-input"
+            />
+            {renderClearButton(param.key, !!(value && value.toString().trim()))}
+          </div>
         );
 
       case 'boolean':
@@ -300,14 +313,17 @@ export function ScriptCard({
 
       case 'textarea':
         return (
-          <textarea
-            value={value || ''}
-            onChange={(e) => handleParameterChange(param.key, (e.target as HTMLTextAreaElement).value)}
-            placeholder={param.placeholder}
-            disabled={isRunning}
-            class="script-textarea"
-            rows={4}
-          />
+          <div class="textarea-wrapper">
+            <textarea
+              value={value || ''}
+              onChange={(e) => handleParameterChange(param.key, (e.target as HTMLTextAreaElement).value)}
+              placeholder={param.placeholder}
+              disabled={isRunning}
+              class="script-textarea"
+              rows={4}
+            />
+            {renderClearButton(param.key, !!(value && value.toString().trim()), 'clear-button-textarea')}
+          </div>
         );
 
       default:

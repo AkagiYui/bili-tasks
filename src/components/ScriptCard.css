@@ -307,6 +307,120 @@
   display: block;
 }
 
+/* 通用输入框包装器样式 */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper .script-input {
+  width: 100%;
+  padding-right: 36px; /* 为清空按钮留出空间 */
+}
+
+.textarea-wrapper {
+  position: relative;
+}
+
+.textarea-wrapper .script-textarea {
+  width: 100%;
+  padding-right: 36px; /* 为清空按钮留出空间 */
+}
+
+/* 通用清空按钮样式 - 仅适用于参数输入框 */
+.script-card .clear-button {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+.script-card .clear-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.script-card .clear-button:active {
+  transform: translateY(-50%) scale(0.95);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.script-card .clear-button svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.script-card .clear-button svg path {
+  stroke: currentColor;
+}
+
+/* 备选方案：如果SVG不显示，使用CSS绘制×符号 */
+.script-card .clear-button::before {
+  content: "×";
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none; /* 默认隐藏，只在SVG不可用时显示 */
+}
+
+/* 如果SVG不支持或加载失败，显示备选符号 */
+.script-card .clear-button:not(:has(svg)) {
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.script-card .clear-button:not(:has(svg))::before {
+  display: block;
+}
+
+/* 收藏夹输入框的清空按钮继承通用样式 */
+
+/* 多行文本框的清空按钮 */
+.script-card .clear-button-textarea {
+  top: 12px; /* 固定位置，位于右上角 */
+  transform: none;
+}
+
+.script-card .clear-button-textarea:hover {
+  transform: scale(1.1);
+}
+
+.script-card .clear-button-textarea:active {
+  transform: scale(0.95);
+}
+
+/* 确保textarea清空按钮的SVG也正确显示 */
+.script-card .clear-button-textarea svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
 .favorite-loading,
 .favorite-error {
   margin-top: 8px;
