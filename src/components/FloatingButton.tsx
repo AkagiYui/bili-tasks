@@ -1,5 +1,5 @@
 import { JSX } from 'preact';
-import { FloatingButtonProps } from '../types';
+import { FloatingButtonProps } from '@/types';
 import './FloatingButton.css';
 
 export function FloatingButton({ onClick }: FloatingButtonProps): JSX.Element {

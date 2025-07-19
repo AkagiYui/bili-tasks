@@ -1,6 +1,6 @@
 import { JSX } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
-import { ScriptConfig, ScriptParameter, FavoriteList } from '../types';
+import { ScriptConfig, ScriptParameter, FavoriteList } from '@/types';
 import { GM_setValue, GM_getValue } from '$';
 import './ScriptCard.css';
 

@@ -1,4 +1,4 @@
-import { LogEntry, ScriptExecution } from '../types';
+import { LogEntry, ScriptExecution } from '@/types';
 import { ScriptExecutor } from './base';
 import {
   MoveShortestToToviewExecutor,

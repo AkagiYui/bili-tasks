@@ -1,6 +1,6 @@
 import { JSX } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
-import { ModalProps } from '../types';
+import { ModalProps } from '@/types';
 import './Modal.css';
 
 export function Modal({ isOpen, onClose, children }: ModalProps): JSX.Element | null {

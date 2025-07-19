@@ -97,7 +97,7 @@ export function formatFileSize(bytes: number): string {
  * @returns 唯一ID字符串
  */
 export function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
 /**
@@ -153,8 +153,8 @@ export function debounce<T extends (...args: any[]) => any>(
 ): (...args: Parameters<T>) => void {
   let timeoutId: number;
   return (...args: Parameters<T>) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func(...args), delay);
+    window.clearTimeout(timeoutId);
+    timeoutId = window.setTimeout(() => func(...args), delay);
   };
 }
 

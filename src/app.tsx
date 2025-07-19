@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks';
-import { FloatingButton } from './components/FloatingButton';
-import { Modal } from './components/Modal';
-import { TaskPanel } from './components/TaskPanel';
+import { FloatingButton } from '@/components/FloatingButton';
+import { Modal } from '@/components/Modal';
+import { TaskPanel } from '@/components/TaskPanel';
 
 export function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);

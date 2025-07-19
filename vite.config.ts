@@ -1,9 +1,15 @@
 import { defineConfig } from 'vite';
 import preact from '@preact/preset-vite';
 import monkey, { cdn } from 'vite-plugin-monkey';
+import { fileURLToPath, URL } from "node:url"
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
   plugins: [
     preact(),
     monkey({

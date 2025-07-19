@@ -1,6 +1,6 @@
 import { JSX } from 'preact';
 import { useEffect, useRef } from 'preact/hooks';
-import { LogEntry } from '../types';
+import { LogEntry } from '@/types';
 import './LogPanel.css';
 
 interface LogPanelProps {

@@ -1,5 +1,5 @@
 import { JSX } from 'preact';
-import { TaskPanelProps } from '../types';
+import { TaskPanelProps } from '@/types';
 import { ScriptManager } from './ScriptManager';
 import './TaskPanel.css';
 

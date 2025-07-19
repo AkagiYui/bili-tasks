@@ -1,5 +1,5 @@
 import { ScriptExecutor } from './base';
-import { delay, containsAnyKeyword } from '../utils/helpers';
+import { delay, containsAnyKeyword } from '@/utils/helpers';
 import {
   getToViewList,
   getFavoriteResourceList,
@@ -12,8 +12,8 @@ import {
   getLotteryInfo,
   getVideoInfo,
   getFavoriteInfo
-} from '../api/bili';
-import { av2bv, bv2av, isValidBvid, isValidAid } from '../utils/bvConverter';
+} from '@/api/bili';
+import { av2bv, bv2av, isValidAid } from '@/utils/bvConverter';
 
 /**
  * BV/AV号转换执行器

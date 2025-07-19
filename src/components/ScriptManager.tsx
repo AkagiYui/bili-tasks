@@ -3,10 +3,10 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { ScriptCard } from './ScriptCard';
 import { LogPanel } from './LogPanel';
 import { ResizeHandle } from './ResizeHandle';
-import { LogEntry, AppState } from '../types';
-import { SCRIPT_CONFIGS } from '../scripts/config';
-import { ScriptExecutionManager } from '../scripts/executor';
-import { generateId } from '../utils/helpers';
+import { LogEntry, AppState } from '@/types';
+import { SCRIPT_CONFIGS } from '@/scripts/config';
+import { ScriptExecutionManager } from '@/scripts/executor';
+import { generateId } from '@/utils/helpers';
 import {
   calculateNewWidths,
   calculateRatio,
@@ -16,8 +16,8 @@ import {
   debounce,
   ResizeState,
   ResizeConfig
-} from '../utils/resizer';
-import { getFavoriteList } from '../api/bili';
+} from '@/utils/resizer';
+import { getFavoriteList } from '@/api/bili';
 import { GM_setValue, GM_getValue } from '$';
 import './ScriptManager.css';
 

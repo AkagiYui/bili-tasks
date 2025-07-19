@@ -1,5 +1,5 @@
-import { ScriptExecution, LogEntry } from '../types';
-import { generateId } from '../utils/helpers';
+import { ScriptExecution, LogEntry } from '@/types';
+import { generateId } from '@/utils/helpers';
 
 /**
  * 脚本执行器基类
