@@ -78,7 +78,7 @@ export abstract class ScriptExecutor {
    */
   public async run(parameters: Record<string, any>): Promise<ScriptExecution> {
     try {
-      this.log('info', '开始执行脚本');
+      this.log('debug', '开始执行脚本');
       this.updateProgress(0);
 
       const result = await this.execute(parameters);
@@ -87,7 +87,7 @@ export abstract class ScriptExecutor {
       this.execution.endTime = new Date();
       this.execution.result = result;
       this.updateProgress(100);
-      this.log('success', '脚本执行完成');
+      this.log('debug', '脚本执行完成');
 
     } catch (error) {
       this.execution.status = this.shouldStop ? 'stopped' : 'failed';

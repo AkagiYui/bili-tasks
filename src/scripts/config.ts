@@ -196,7 +196,7 @@ const ALL_SCRIPT_CONFIGS: ScriptConfig[] = [
         type: 'number',
         defaultValue: '',
         required: false,
-        description: '指定用户ID，不填则为当前登录用户'
+        description: '指定用户ID，不填则为当前登录用户。 填其他人可以扫描其他人的动态，但无法删除。'
       }
     ]
   },

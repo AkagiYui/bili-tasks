@@ -151,7 +151,7 @@ export class VideoInfoExecutor extends ScriptExecutor {
 export class MoveShortestToToviewExecutor extends ScriptExecutor {
   public async execute(parameters: Record<string, any>): Promise<any> {
     const { favoriteId, upTo, durationThreshold, ignoreFrontPage, ignoreTitleKeywords } = parameters;
-    
+
     if (!favoriteId) {
       throw new Error('请输入收藏夹ID');
     }
@@ -164,7 +164,7 @@ export class MoveShortestToToviewExecutor extends ScriptExecutor {
       const toviewList = await getToViewList();
       const currentCount = toviewList.count;
       const targetCount = upTo || 100;
-      
+
       if (currentCount >= targetCount) {
         this.log('info', `稍后再看已有 ${currentCount} 个视频，达到目标数量 ${targetCount}`);
         return { added: 0, currentCount, targetCount };
@@ -185,10 +185,10 @@ export class MoveShortestToToviewExecutor extends ScriptExecutor {
 
       while (addedCount < needCount) {
         this.checkShouldStop();
-        
+
         this.log('info', `正在获取第 ${pageIndex} 页收藏夹资源...`);
         const favoriteData = await getFavoriteResourceList(favoriteId, pageIndex, pageSize);
-        
+
         if (!favoriteData.medias || favoriteData.medias.length === 0) {
           this.log('warn', '已到达收藏夹末尾，停止添加');
           break;
@@ -200,32 +200,32 @@ export class MoveShortestToToviewExecutor extends ScriptExecutor {
           if (maxDuration > 0 && video.duration > maxDuration) {
             return false;
           }
-          
+
           // 过滤关键词
           if (keywords.length > 0 && containsAnyKeyword(video.title, keywords)) {
             return false;
           }
-          
+
           return true;
         });
 
         // 按时长排序，选择最短的
         candidates.sort((a, b) => a.duration - b.duration);
-        
+
         for (const video of candidates) {
           if (addedCount >= needCount) break;
-          
+
           this.checkShouldStop();
-          
+
           try {
             await addToToView(video.id);
             addedCount++;
             this.log('success', `已添加: ${video.title} (时长: ${Math.floor(video.duration / 60)}分钟)`);
-          
+
           } catch (error) {
             this.log('error', `添加失败: ${video.title} - ${error instanceof Error ? error.message : String(error)}`);
           }
-          
+
           this.updateProgress(20 + (addedCount / needCount) * 70);
         }
 
@@ -234,7 +234,7 @@ export class MoveShortestToToviewExecutor extends ScriptExecutor {
 
       this.log('success', `操作完成，共添加 ${addedCount} 个视频到稍后再看`);
       return { added: addedCount, currentCount: currentCount + addedCount, targetCount };
-      
+
     } catch (error) {
       this.log('error', `操作失败: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
@@ -329,7 +329,7 @@ export class AddToviewToFavoriteExecutor extends ScriptExecutor {
         total,
         videos: videosToAdd.slice(0, addedCount).map(v => ({ id: v.id, title: v.title }))
       };
-      
+
     } catch (error) {
       this.log('error', `操作失败: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
@@ -343,7 +343,7 @@ export class AddToviewToFavoriteExecutor extends ScriptExecutor {
 export class MoveFavoriteExecutor extends ScriptExecutor {
   public async execute(parameters: Record<string, any>): Promise<any> {
     const { fromFavorite, toFavorite, upTo, onlyWithKeywords } = parameters;
-    
+
     if (!fromFavorite || !toFavorite) {
       throw new Error('请输入源收藏夹ID和目标收藏夹ID');
     }
@@ -354,17 +354,17 @@ export class MoveFavoriteExecutor extends ScriptExecutor {
     try {
       const keywords = onlyWithKeywords ? onlyWithKeywords.split(',').map((k: string) => k.trim()) : [];
       const maxCount = upTo || 1000;
-      
+
       let movedCount = 0;
       let pageIndex = 1;
       const pageSize = 20;
 
       while (movedCount < maxCount) {
         this.checkShouldStop();
-        
+
         this.log('info', `正在获取第 ${pageIndex} 页源收藏夹资源...`);
         const favoriteData = await getFavoriteResourceList(fromFavorite, pageIndex, pageSize);
-        
+
         if (!favoriteData.medias || favoriteData.medias.length === 0) {
           this.log('info', '已处理完所有视频');
           break;
@@ -373,29 +373,29 @@ export class MoveFavoriteExecutor extends ScriptExecutor {
         // 过滤视频
         let candidates = favoriteData.medias;
         if (keywords.length > 0) {
-          candidates = candidates.filter(video => 
+          candidates = candidates.filter(video =>
             containsAnyKeyword(video.title, keywords)
           );
         }
 
         for (const video of candidates) {
           if (movedCount >= maxCount) break;
-          
+
           this.checkShouldStop();
-          
+
           try {
             await moveToFavorite(
-              fromFavorite, 
-              toFavorite, 
+              fromFavorite,
+              toFavorite,
               [{ id: video.id, type: video.type }]
             );
             movedCount++;
             this.log('success', `已移动: ${video.title}`);
-            
+
           } catch (error) {
             this.log('error', `移动失败: ${video.title} - ${error instanceof Error ? error.message : String(error)}`);
           }
-          
+
           this.updateProgress(10 + (movedCount / maxCount) * 80);
         }
 
@@ -404,7 +404,7 @@ export class MoveFavoriteExecutor extends ScriptExecutor {
 
       this.log('success', `操作完成，共移动 ${movedCount} 个视频`);
       return { moved: movedCount, maxCount };
-      
+
     } catch (error) {
       this.log('error', `操作失败: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
@@ -418,71 +418,159 @@ export class MoveFavoriteExecutor extends ScriptExecutor {
 export class DeleteTimeoutLotteryExecutor extends ScriptExecutor {
   public async execute(parameters: Record<string, any>): Promise<any> {
     const { detectOnly, notDeleteWinning, userId } = parameters;
-    
+
     this.log('info', `开始${detectOnly ? '检测' : '删除'}过期抽奖动态`);
+
+    let log = `执行参数: ${JSON.stringify(parameters)}。`
+    log += `\n仅检测模式: ${detectOnly ? '是' : '否'}。`
+    log += `\n保护中奖动态: ${notDeleteWinning ? '是' : '否'}。`
+    log += `\n目标用户: ${userId || '当前登录用户'}。`
+    log += '\n========== 开始执行过期抽奖动态处理 ==========';
+    this.log('debug', log);
     this.updateProgress(10);
 
     try {
       let deletedCount = 0;
       let detectedCount = 0;
-      let offset = '';
-      
+      let listOffset: string = '';
+
       while (true) {
         this.checkShouldStop();
-        
+
         this.log('info', '正在获取动态列表...');
-        const dynamicData = await getDynamicList(userId, offset);
-        
-        if (!dynamicData.items || dynamicData.items.length === 0) {
-          this.log('info', '已处理完所有动态');
+        this.log('debug', `请求参数: userId=${userId || '当前用户'}, offset=${listOffset || '初始页面'}`);
+        const dynamicData = await getDynamicList(userId, listOffset);
+        const hasMore: boolean = dynamicData.has_more;
+        listOffset = dynamicData.offset;
+
+        for (let i = 0; i < dynamicData.items.length; i++) {
+          const item = dynamicData.items[i];
+          this.checkShouldStop();
+
+          this.log('debug', `---------- 处理动态 ${i + 1}/${dynamicData.items.length} ----------`);
+          this.updateProgress(10 + (i / dynamicData.items.length) * 80);
+
+          // 动态基本信息
+          const dynamicId: string = item.id_str
+          const publisherInfo = item.modules.module_author
+          const publisherId: number = publisherInfo.mid
+          const publishTimestamp: number = publisherInfo.pub_ts
+          const dynamicText: string | undefined = item.modules.module_dynamic.desc?.text.replace("\n", '');
+          const dynamicType = item.type;
+          log = `动态ID: ${item.id_str}`
+          log += `\n发布时间：${new Date(publishTimestamp * 1000).toLocaleString('zh-CN')}`;
+          log += `\n动态类型: ${dynamicType}`;
+          log += `\n动态内容: ${dynamicText}`;
+          
+          // 跳过非转发动态
+          if (dynamicType !== 'DYNAMIC_TYPE_FORWARD') {
+            log += `\n非转发动态，跳过`;
+            this.log('info', log);
+            continue;
+          }
+
+          // 被转发动态基本信息
+          const originDynamic = item.orig;
+          const originDynamicId: string = originDynamic.id_str;
+          const originDynamicPublisherInfo = originDynamic.modules.module_author;
+          const originDynamicPublisherId: number = originDynamicPublisherInfo.mid;
+          const originDynamicPublisherName: string = originDynamicPublisherInfo.name;
+          const originDynamicPublishTimestamp: number = originDynamicPublisherInfo.pub_ts;
+          const originDynamicType = originDynamic.type;
+          log += `\n被转发动态ID: ${originDynamicId}`;
+          log += `\n被转发动态发布者: ${originDynamicPublisherName}(${originDynamicPublisherId})`;
+          log += `\n被转发动态发布时间: ${new Date(originDynamicPublishTimestamp * 1000).toLocaleString('zh-CN')}`;
+          log += `\n被转发动态类型: ${originDynamicType}`;
+
+          // 跳过非文本动态
+          if (['DYNAMIC_TYPE_DRAW', 'DYNAMIC_TYPE_WORD'].indexOf(originDynamicType) === -1) {
+            log += `\n被转发动态非文本动态类型，跳过`;
+            this.log('info', log);
+            continue;
+          }
+
+          // 判断是否为抽奖动态
+          const hasLotteryNode = originDynamic.modules.module_dynamic.desc.rich_text_nodes.some(
+            (node: any) => node.type === 'RICH_TEXT_NODE_TYPE_LOTTERY'
+          );
+          if (!hasLotteryNode) {
+            log += `\n被转发动态非抽奖动态，跳过`;
+            this.log('info', log);
+            continue;
+          }
+
+          const originDynamicText: string | undefined = originDynamic.modules.module_dynamic.desc?.text.replace('\n', '');
+          log += `\n被转发动态内容: ${originDynamicText}`;
+          this.log('info', log);
+
+          // 获取抽奖信息
+          this.log('debug', '正在获取抽奖信息...');
+          const lotteryInfo = await getLotteryInfo(originDynamicId);
+          this.log('debug', `抽奖信息: ${JSON.stringify(lotteryInfo)}`);
+          const lotteryStatus = lotteryInfo.status; // 0 等待开奖 2 已结束
+          const lotteryTimestamp = lotteryInfo.lottery_time; // 开奖时间
+          const lotteryParticipated = lotteryInfo.participated; // 是否参与(猜)
+          const lotteryFollowed = lotteryInfo.followed; // 是否关注
+          const lotteryReposted = lotteryInfo.reposted; // 是否转发
+          log = `抽奖状态: ${lotteryStatus}`;
+          log += `\n开奖时间: ${new Date(lotteryTimestamp * 1000).toLocaleString('zh-CN')}`;
+          log += `\n是否参与: ${lotteryParticipated}`;
+          log += `\n是否关注了发布者: ${lotteryFollowed}`;
+          log += `\n是否转发了本动态: ${lotteryReposted}`;
+
+          // 检查是否开奖
+          const lotteryResult = lotteryInfo.lottery_result;
+          if (!lotteryResult) {
+            log += `\n未找到开奖结果，跳过`;
+            this.log('info', log);
+            continue;
+          }
+
+          // 检查是否中奖
+          const win = Object.values(lotteryResult).some((userList: unknown) => {
+            if (!Array.isArray(userList)) return false; // 确保 userList 是数组类型
+            return userList.some((user: any) => user.uid === publisherId);
+          });
+          log += `\n是否中奖: ${win}`;
+
+          // 仅检测
+          detectedCount++;
+          if (detectOnly) {
+            log += `\n仅检测模式，跳过删除`;
+            this.log('info', log);
+            continue;
+          }
+
+          // 删除抽奖动态
+          if (win && notDeleteWinning) {
+            log += `\n不删除中奖动态，跳过`;
+            this.log('info', log);
+            continue;
+          }
+
+          // 删除动态
+          this.log('debug', '正在删除动态...');
+          await deleteDynamic(dynamicId);
+          deletedCount++;
+          this.log('debug', '动态删除成功');
+        }
+
+        this.log('debug', '========== 当前页面处理完成 ==========');
+        if (!hasMore) {
+          this.log('debug', '已到达最后一页，结束处理');
           break;
         }
 
-        for (const item of dynamicData.items) {
-          this.checkShouldStop();
-          
-          // 检查是否为抽奖动态
-          if (item.type === 'DYNAMIC_TYPE_FORWARD' && item.modules?.module_dynamic?.additional?.type === 'ADDITIONAL_TYPE_LOTTERY') {
-            try {
-              const lotteryInfo = await getLotteryInfo(item.id_str);
-              const isExpired = new Date(lotteryInfo.lottery_time * 1000) < new Date();
-              const isWinning = lotteryInfo.lottery_result?.is_winner;
-              
-              if (isExpired) {
-                detectedCount++;
-                
-                if (notDeleteWinning && isWinning) {
-                  this.log('info', `跳过中奖动态: ${item.id_str}`);
-                  continue;
-                }
-                
-                if (!detectOnly) {
-                  await deleteDynamic(item.id_str);
-                  deletedCount++;
-                  this.log('success', `已删除过期抽奖动态: ${item.id_str}`);
-                } else {
-                  this.log('info', `检测到过期抽奖动态: ${item.id_str}`);
-                }
-              }
-            } catch (error) {
-              this.log('error', `处理动态失败: ${item.id_str} - ${error instanceof Error ? error.message : String(error)}`);
-            }
-          }
-        }
-
-        offset = dynamicData.offset;
-        if (!offset) break;
-        
         this.updateProgress(Math.min(90, 10 + detectedCount * 2));
+        this.log('debug', `当前进度: 已检测到 ${detectedCount} 个过期抽奖动态，已删除 ${deletedCount} 个`);
       }
 
-      const message = detectOnly 
+      const message = detectOnly
         ? `检测完成，发现 ${detectedCount} 个过期抽奖动态`
         : `删除完成，共删除 ${deletedCount}/${detectedCount} 个过期抽奖动态`;
-      
+
       this.log('success', message);
       return { detected: detectedCount, deleted: deletedCount, detectOnly };
-      
     } catch (error) {
       this.log('error', `操作失败: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
@@ -496,7 +584,7 @@ export class DeleteTimeoutLotteryExecutor extends ScriptExecutor {
 export class ClearToviewExecutor extends ScriptExecutor {
   public async execute(parameters: Record<string, any>): Promise<any> {
     const { confirm } = parameters;
-    
+
     if (!confirm) {
       throw new Error('请确认要清空稍后再看列表');
     }
@@ -508,7 +596,7 @@ export class ClearToviewExecutor extends ScriptExecutor {
       // 获取当前稍后再看数量
       const toviewList = await getToViewList();
       const totalCount = toviewList.count;
-      
+
       if (totalCount === 0) {
         this.log('info', '稍后再看列表已为空');
         return { cleared: 0, total: 0 };
@@ -518,12 +606,12 @@ export class ClearToviewExecutor extends ScriptExecutor {
       this.updateProgress(50);
 
       await clearToViewList();
-      
+
       this.updateProgress(100);
       this.log('success', `成功清空稍后再看列表，共清除 ${totalCount} 个视频`);
-      
+
       return { cleared: totalCount, total: totalCount };
-      
+
     } catch (error) {
       this.log('error', `清空失败: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
