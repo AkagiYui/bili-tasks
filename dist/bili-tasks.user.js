@@ -10,7 +10,7 @@
 // @supportURL   https://github.com/AkagiYui/UserScript/issues
 // @match        https://space.bilibili.com/*/favlist*
 // @require      https://cdn.jsdelivr.net/npm/preact@10.26.9/dist/preact.min.js
-// @grant        GM_addStyle
+// @grant        GM_addStyles
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_xmlhttpRequest
