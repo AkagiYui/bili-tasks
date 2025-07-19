@@ -218,9 +218,7 @@ export class MoveShortestToToviewExecutor extends ScriptExecutor {
             await addToToView(video.id);
             addedCount++;
             this.log('success', `已添加: ${video.title} (时长: ${Math.floor(video.duration / 60)}分钟)`);
-            
-            // 添加延迟避免频率限制
-            await delay(1000);
+          
           } catch (error) {
             this.log('error', `添加失败: ${video.title} - ${error instanceof Error ? error.message : String(error)}`);
           }
@@ -229,7 +227,6 @@ export class MoveShortestToToviewExecutor extends ScriptExecutor {
         }
 
         pageIndex++;
-        await delay(500); // 页面间延迟
       }
 
       this.log('success', `操作完成，共添加 ${addedCount} 个视频到稍后再看`);
@@ -392,7 +389,6 @@ export class MoveFavoriteExecutor extends ScriptExecutor {
             movedCount++;
             this.log('success', `已移动: ${video.title}`);
             
-            await delay(1000);
           } catch (error) {
             this.log('error', `移动失败: ${video.title} - ${error instanceof Error ? error.message : String(error)}`);
           }
@@ -401,7 +397,6 @@ export class MoveFavoriteExecutor extends ScriptExecutor {
         }
 
         pageIndex++;
-        await delay(500);
       }
 
       this.log('success', `操作完成，共移动 ${movedCount} 个视频`);
@@ -515,7 +510,6 @@ export class DeleteTimeoutLotteryExecutor extends ScriptExecutor {
                   await deleteDynamic(item.id_str);
                   deletedCount++;
                   this.log('success', `已删除过期抽奖动态: ${item.id_str}`);
-                  await delay(1000);
                 } else {
                   this.log('info', `检测到过期抽奖动态: ${item.id_str}`);
                 }
@@ -529,7 +523,6 @@ export class DeleteTimeoutLotteryExecutor extends ScriptExecutor {
         offset = dynamicData.offset;
         if (!offset) break;
         
-        await delay(500);
         this.updateProgress(Math.min(90, 10 + detectedCount * 2));
       }
 
