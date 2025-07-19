@@ -105,17 +105,17 @@ export function ScriptCard({
 
     return favoriteList.list
       .map(fav => ({
-        value: `${fav.title}(${fav.fid})`, // value设置为显示格式
-        fid: fav.fid, // 保留原始ID用于提取
+        value: `${fav.title}(${fav.id})`, // value设置为显示格式
+        id: fav.id, // 保留原始ID用于提取
         title: fav.title
       }))
       .sort((a, b) => a.value.localeCompare(b.value));
   };
 
   // 根据ID查找收藏夹标题
-  const getFavoriteTitleById = (fid: number): string | null => {
+  const getFavoriteTitleById = (id: number): string | null => {
     if (!favoriteList?.list) return null;
-    const favorite = favoriteList.list.find(fav => fav.fid === fid);
+    const favorite = favoriteList.list.find(fav => fav.id === id);
     return favorite ? favorite.title : null;
   };
 
@@ -159,8 +159,8 @@ export function ScriptCard({
   // 获取输入框显示值
   const getFavoriteInputDisplayValue = (paramKey: string, value: number): string => {
     const isFocused = focusedFavoriteInputs.has(paramKey);
-    if (isFocused || !value) {
-      return value ? value.toString() : '';
+    if (isFocused || value === undefined || value === null) {
+      return value !== undefined && value !== null ? value.toString() : '';
     }
     return formatDisplayValue(value);
   };
@@ -199,13 +199,13 @@ export function ScriptCard({
           <div class="input-wrapper">
             <input
               type="text"
-              value={value || ''}
+              value={value !== undefined && value !== null ? value.toString() : ''}
               onChange={(e) => handleParameterChange(param.key, (e.target as HTMLInputElement).value)}
               placeholder={param.placeholder}
               disabled={isRunning}
               class="script-input"
             />
-            {renderClearButton(param.key, !!(value && value.toString().trim()))}
+            {renderClearButton(param.key, value !== undefined && value !== null && value !== '' && value.toString().trim() !== '')}
           </div>
         );
 
@@ -235,11 +235,11 @@ export function ScriptCard({
                   class="script-input favorite-input"
                   list={`favorites-${script.id}-${param.key}`}
                 />
-                {renderClearButton(param.key, !!(value && value.toString().trim()), 'clear-button-favorite')}
+                {renderClearButton(param.key, value !== undefined && value !== null && value !== '', 'clear-button-favorite')}
               </div>
               <datalist id={`favorites-${script.id}-${param.key}`}>
                 {favoriteOptions.map(option => (
-                  <option key={option.fid} value={option.value} />
+                  <option key={option.id} value={option.value} />
                 ))}
               </datalist>
               {favoriteListLoading && (
@@ -271,13 +271,13 @@ export function ScriptCard({
           <div class="input-wrapper">
             <input
               type="number"
-              value={value || ''}
+              value={value !== undefined && value !== null ? value.toString() : ''}
               onChange={(e) => handleParameterChange(param.key, Number((e.target as HTMLInputElement).value))}
               placeholder={param.placeholder}
               disabled={isRunning}
               class="script-input"
             />
-            {renderClearButton(param.key, !!(value && value.toString().trim()))}
+            {renderClearButton(param.key, value !== undefined && value !== null && value !== '')}
           </div>
         );
 
@@ -315,14 +315,14 @@ export function ScriptCard({
         return (
           <div class="textarea-wrapper">
             <textarea
-              value={value || ''}
+              value={value !== undefined && value !== null ? value.toString() : ''}
               onChange={(e) => handleParameterChange(param.key, (e.target as HTMLTextAreaElement).value)}
               placeholder={param.placeholder}
               disabled={isRunning}
               class="script-textarea"
               rows={4}
             />
-            {renderClearButton(param.key, !!(value && value.toString().trim()), 'clear-button-textarea')}
+            {renderClearButton(param.key, value !== undefined && value !== null && value !== '' && value.toString().trim() !== '', 'clear-button-textarea')}
           </div>
         );
 

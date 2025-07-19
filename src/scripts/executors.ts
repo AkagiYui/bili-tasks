@@ -5,12 +5,13 @@ import {
   getFavoriteResourceList,
   addToToView,
   clearToViewList,
-  addToFavorite,
+  addOrDeleteToFavorite,
   moveToFavorite,
   getDynamicList,
   deleteDynamic,
   getLotteryInfo,
-  getVideoInfo
+  getVideoInfo,
+  getFavoriteInfo
 } from '../api/bili';
 import { av2bv, bv2av, isValidBvid, isValidAid } from '../utils/bvConverter';
 
@@ -250,13 +251,13 @@ export class MoveShortestToToviewExecutor extends ScriptExecutor {
 export class AddToviewToFavoriteExecutor extends ScriptExecutor {
   public async execute(parameters: Record<string, any>): Promise<any> {
     const { favoriteId, maxCount } = parameters;
-    
+
     if (!favoriteId) {
       throw new Error('请输入收藏夹ID');
     }
 
     this.log('info', `开始将稍后再看的视频添加到收藏夹 ${favoriteId}`);
-    this.updateProgress(10);
+    this.updateProgress(5);
 
     try {
       // 获取稍后再看列表
@@ -267,36 +268,64 @@ export class AddToviewToFavoriteExecutor extends ScriptExecutor {
       }
 
       const maxAdd = maxCount || toviewList.list.length;
-      const videosToAdd = toviewList.list.slice(0, maxAdd);
-      
+      const videosToAdd = toviewList.list.slice(0, maxAdd).reverse(); // 稍后再看最新的视频添加到收藏夹最新的位置
+
       this.log('info', `准备添加 ${videosToAdd.length} 个视频到收藏夹`);
+      this.updateProgress(10);
+
+      // 获取收藏夹当前信息，检查容量
+      this.log('info', '正在检查收藏夹容量...');
+      const favoriteInfo = await getFavoriteInfo(favoriteId);
+      const currentCount = favoriteInfo.media_count;
+      const toAddCount = videosToAdd.length;
+      const remainingSpace = 1000 - currentCount;
+
+      this.log('info', `收藏夹当前视频数量: ${currentCount}/1000`);
+      this.log('info', `待添加视频数量: ${toAddCount}`);
+      this.log('info', `剩余空间: ${remainingSpace}`);
+
+      if (currentCount + toAddCount > 1000) {
+        this.log('error', `收藏夹空间不足，无法添加所有视频。当前: ${currentCount}，待添加: ${toAddCount}，剩余空间: ${remainingSpace}`);
+        throw new Error('收藏夹空间不足，无法添加所有视频');
+      }
+
       this.updateProgress(20);
 
+      // 逐个添加视频到收藏夹（API不支持多个视频批量添加到一个收藏夹）
       let addedCount = 0;
       const total = videosToAdd.length;
 
+      this.log('info', `开始逐个添加 ${total} 个视频到收藏夹`);
+
       for (let i = 0; i < total; i++) {
         this.checkShouldStop();
-        
+
         const video = videosToAdd[i];
         this.log('info', `正在添加: ${video.title} (${i + 1}/${total})`);
 
         try {
-          await addToFavorite(favoriteId, [{ id: video.id, type: video.type }]);
+          // 使用正确的API：一个视频添加到一个收藏夹
+          await addOrDeleteToFavorite(video.aid, 2, [favoriteId], []);
           addedCount++;
           this.log('success', `添加成功: ${video.title}`);
-          
-          // 添加延迟
-          await delay(1000);
         } catch (error) {
           this.log('error', `添加失败: ${video.title} - ${error instanceof Error ? error.message : String(error)}`);
+          throw error;
         }
 
-        this.updateProgress(20 + (i + 1) / total * 70);
+        this.updateProgress(30 + (i + 1) / total * 60);
       }
 
       this.log('success', `操作完成，成功添加 ${addedCount}/${total} 个视频到收藏夹`);
-      return { added: addedCount, total };
+      if (addedCount > 0) {
+        this.log('info', `成功添加的视频：${videosToAdd.slice(0, addedCount).map(v => v.title).join(', ')}`);
+      }
+
+      return {
+        added: addedCount,
+        total,
+        videos: videosToAdd.slice(0, addedCount).map(v => ({ id: v.id, title: v.title }))
+      };
       
     } catch (error) {
       this.log('error', `操作失败: ${error instanceof Error ? error.message : String(error)}`);

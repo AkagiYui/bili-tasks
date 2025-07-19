@@ -79,7 +79,7 @@ export interface VideoInfo {
   title: string;
   duration: number;
   bvid?: string;
-  aid?: number;
+  aid: number;
   pic?: string;
   upper?: {
     mid: number;

@@ -100,7 +100,7 @@ export async function addToToView(videoId: number): Promise<void> {
 export async function deleteFromToView(videoIds: number[]): Promise<void> {
   const response = await biliApiClient.post(
     'https://api.bilibili.com/x/v2/history/toview/del',
-    { 
+    {
       viewed: 'false',
       aid: videoIds.join(','),
       csrf: getCsrfToken()
@@ -128,7 +128,7 @@ export async function clearToViewList(): Promise<void> {
  * 从收藏夹删除视频
  */
 export async function deleteFromFavorite(
-  favoriteId: number, 
+  favoriteId: number,
   resourceIds: Array<{ id: number; type: number }>
 ): Promise<void> {
   const resources = resourceIds.map(r => `${r.id}:${r.type}`).join(',');
@@ -146,27 +146,27 @@ export async function deleteFromFavorite(
 }
 
 /**
- * 添加到收藏夹
+ * 视频添加/删除到收藏夹
  */
-export async function addToFavorite(
-  favoriteId: number, 
-  resourceIds: Array<{ id: number; type: number }>
+export async function addOrDeleteToFavorite(
+  resourceId: number,
+  resourceType: number,
+  addFavoriteIds: number[] = [],
+  delFavoriteIds: number[] = []
 ): Promise<void> {
-  // B站API一次只能添加一个资源
-  for (const resource of resourceIds) {
-    const response = await biliApiClient.post(
-      'https://api.bilibili.com/x/v3/fav/resource/deal',
-      {
-        rid: resource.id,
-        type: resource.type,
-        add_media_ids: favoriteId.toString(),
-        del_media_ids: '',
-        csrf: getCsrfToken()
-      }
-    );
-    if (response.code !== 0) {
-      throw new Error(`Failed to add to favorite: ${response.message}`);
+  // B站API一次只能添加/删除一个资源
+  const response = await biliApiClient.post(
+    'https://api.bilibili.com/x/v3/fav/resource/deal',
+    {
+      rid: resourceId,
+      type: resourceType,
+      add_media_ids: addFavoriteIds.join(','),
+      del_media_ids: delFavoriteIds.join(','),
+      csrf: getCsrfToken()
     }
+  );
+  if (response.code !== 0) {
+    throw new Error(`Failed to add or delete to favorite: ${response.message}`);
   }
 }
 
