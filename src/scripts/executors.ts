@@ -33,9 +33,6 @@ export class BvAvConverterExecutor extends ScriptExecutor {
       let result: { input: string; output: string; type: string };
 
       if (videoId.startsWith('BV')) {
-        if (!isValidBvid(videoId)) {
-          throw new Error('无效的BV号格式');
-        }
         const aid = bv2av(videoId);
         result = {
           input: videoId,
