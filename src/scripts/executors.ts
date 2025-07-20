@@ -152,7 +152,7 @@ export class VideoInfoExecutor extends ScriptExecutor {
  */
 export class MoveFavoriteToToviewExecutor extends ScriptExecutor {
   public async execute(parameters: Record<string, any>): Promise<any> {
-    const { favoriteId, sortOrder, upTo, durationThreshold, ignoreFrontPage, ignoreTitleKeywords } = parameters;
+    const { favoriteId, sortOrder, shuffleVideos, upTo, durationThreshold, ignoreFrontPage, ignoreTitleKeywords } = parameters;
 
     if (!favoriteId) {
       throw new Error('请输入收藏夹ID');
@@ -220,8 +220,14 @@ export class MoveFavoriteToToviewExecutor extends ScriptExecutor {
 
     // 根据排序规则对视频进行排序
     const sortOrderValue = sortOrder || 'original';
+    const shuffleEnabled = shuffleVideos === true;
+
     this.log('debug', `正在按 ${sortOrderValue} 规则排序视频...`);
     this.log('debug', `排序前视频数量: ${originVideoInfos.length}`);
+
+    if (shuffleEnabled) {
+      this.log('debug', '注意：已启用随机打乱，排序完成后将被随机打乱覆盖');
+    }
 
     switch (sortOrderValue) {
       case 'shortest':
@@ -251,6 +257,23 @@ export class MoveFavoriteToToviewExecutor extends ScriptExecutor {
         break;
     }
 
+    // 检查是否需要随机打乱
+    if (shuffleEnabled) {
+      this.log('info', '已启用随机打乱，排序规则将失效');
+
+      // Fisher-Yates 洗牌算法
+      for (let i = originVideoInfos.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [originVideoInfos[i], originVideoInfos[j]] = [originVideoInfos[j], originVideoInfos[i]];
+      }
+
+      this.log('debug', `视频列表已随机打乱，共 ${originVideoInfos.length} 个视频`);
+      if (originVideoInfos.length > 0) {
+        this.log('debug', `打乱后第一个视频: ${originVideoInfos[0].title}`);
+        this.log('debug', `打乱后最后一个视频: ${originVideoInfos[originVideoInfos.length - 1].title}`);
+      }
+    }
+
     // 过滤视频
     this.log('debug', `正在过滤视频...`);
     for (const video of originVideoInfos) {
@@ -264,7 +287,8 @@ export class MoveFavoriteToToviewExecutor extends ScriptExecutor {
       if (willMoveVideoInfos.length >= needCount) break;
     }
     let log = `排序和过滤完成，共 ${willMoveVideoInfos.length} 个视频符合条件`;
-    log += `\n排序规则: ${sortOrderValue}`;
+    log += `\n排序规则: ${shuffleEnabled ? '随机打乱（排序规则已失效）' : sortOrderValue}`;
+    log += `\n随机打乱: ${shuffleEnabled ? '已启用' : '未启用'}`;
     log += `\n将要移动的视频列表: ${willMoveVideoInfos.map(v => v.title).join(', ')}`;
     this.log('debug', log);
     this.updateProgress(30);
