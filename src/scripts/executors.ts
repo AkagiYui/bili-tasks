@@ -168,7 +168,7 @@ export class MoveShortestToToviewExecutor extends ScriptExecutor {
     const maxDuration = durationThreshold || 0;
     const ignorePageCount = ignoreFrontPage || 6;
 
-    const originVideoInfos: VideoInfo[] = [];
+    let originVideoInfos: VideoInfo[] = [];
     const willMoveVideoInfos: VideoInfo[] = [];
 
     // 获取稍后再看当前数量
@@ -220,6 +220,7 @@ export class MoveShortestToToviewExecutor extends ScriptExecutor {
 
     // 过滤视频
     this.log('debug', `正在过滤视频...`);
+    originVideoInfos = originVideoInfos.sort((a, b) => a.duration - b.duration);
     for (const video of originVideoInfos) {
       if (ignoreTitleKeywordList.length > 0 && containsAnyKeyword(video.title, ignoreTitleKeywordList)) {
         continue;
