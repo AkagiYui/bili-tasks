@@ -75,11 +75,11 @@ const ALL_SCRIPT_CONFIGS: ScriptConfig[] = [
       },
       {
         key: 'shuffleVideos',
-        label: '随机打乱视频顺序',
+        label: '启用有偏向随机选择',
         type: 'boolean',
         defaultValue: false,
         required: false,
-        description: '启用后将在排序完成后随机打乱视频列表，此时排序规则将失效，适用于随机观看场景'
+        description: '在排序基础上增加随机性，排序靠前的视频有更高被选中概率，兼顾排序偏好和观看多样性'
       },
       {
         key: 'upTo',

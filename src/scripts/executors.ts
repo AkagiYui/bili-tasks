@@ -151,6 +151,115 @@ export class VideoInfoExecutor extends ScriptExecutor {
  * 移动收藏夹视频到稍后再看执行器
  */
 export class MoveFavoriteToToviewExecutor extends ScriptExecutor {
+
+  /**
+   * 计算基于位置的线性递减权重
+   * @param totalCount 视频总数
+   * @param position 视频在排序后列表中的位置（从0开始）
+   * @returns 权重值
+   */
+  private calculatePositionWeight(totalCount: number, position: number): number {
+    return Math.max(1, totalCount - position);
+  }
+
+  /**
+   * 使用轮盘赌算法进行加权随机选择
+   * @param videos 已排序的视频列表
+   * @param targetCount 目标选择数量
+   * @returns 加权随机选择后的视频列表
+   */
+  private performWeightedRandomSelection(videos: any[], targetCount: number): any[] {
+    if (videos.length === 0 || targetCount <= 0) {
+      return [];
+    }
+
+    const totalCount = videos.length;
+    const actualTargetCount = Math.min(targetCount, totalCount);
+    const selected: any[] = [];
+    const availableVideos = [...videos]; // 创建副本避免修改原数组
+
+    this.log('debug', `开始有偏向随机选择，目标数量: ${actualTargetCount}`);
+
+    // 计算初始权重分布统计
+    const weights = availableVideos.map((_, index) => this.calculatePositionWeight(totalCount, index));
+    const maxWeight = Math.max(...weights);
+    const minWeight = Math.min(...weights);
+    const avgWeight = weights.reduce((sum, w) => sum + w, 0) / weights.length;
+
+    this.log('debug', `权重分布: 最高${maxWeight}, 最低${minWeight}, 平均${avgWeight.toFixed(1)}`);
+
+    // 执行加权随机选择
+    for (let i = 0; i < actualTargetCount && availableVideos.length > 0; i++) {
+      // 重新计算当前可用视频的权重
+      const currentWeights = availableVideos.map((_, index) =>
+        this.calculatePositionWeight(availableVideos.length, index)
+      );
+
+      // 轮盘赌选择
+      const selectedIndex = this.rouletteWheelSelection(currentWeights);
+      selected.push(availableVideos[selectedIndex]);
+
+      // 从可用列表中移除已选择的视频
+      availableVideos.splice(selectedIndex, 1);
+    }
+
+    // 统计选择结果分布
+    this.logSelectionDistribution(videos, selected, totalCount);
+
+    return selected;
+  }
+
+  /**
+   * 轮盘赌选择算法
+   * @param weights 权重数组
+   * @returns 选中的索引
+   */
+  private rouletteWheelSelection(weights: number[]): number {
+    const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+    const randomValue = Math.random() * totalWeight;
+
+    let cumulativeWeight = 0;
+    for (let i = 0; i < weights.length; i++) {
+      cumulativeWeight += weights[i];
+      if (randomValue <= cumulativeWeight) {
+        return i;
+      }
+    }
+
+    // 兜底返回最后一个索引（理论上不应该到达这里）
+    return weights.length - 1;
+  }
+
+  /**
+   * 记录选择结果的分布统计
+   * @param originalVideos 原始排序后的视频列表
+   * @param selectedVideos 选择后的视频列表
+   * @param totalCount 原始视频总数
+   */
+  private logSelectionDistribution(originalVideos: any[], selectedVideos: any[], totalCount: number): void {
+    // 计算选择的视频在原始列表中的位置分布
+    const positions = selectedVideos.map(selected =>
+      originalVideos.findIndex(original => original.id === selected.id)
+    );
+
+    // 分层统计：前20%、中间60%、后20%
+    const topTier = Math.ceil(totalCount * 0.2);
+    const middleTier = Math.ceil(totalCount * 0.8);
+
+    const topTierCount = positions.filter(pos => pos < topTier).length;
+    const middleTierCount = positions.filter(pos => pos >= topTier && pos < middleTier).length;
+    const bottomTierCount = positions.filter(pos => pos >= middleTier).length;
+
+    this.log('debug', `有偏向随机选择完成，实际选择分布:`);
+    this.log('debug', `前20%区间选中: ${topTierCount}个 (${(topTierCount/selectedVideos.length*100).toFixed(1)}%)`);
+    this.log('debug', `中间60%区间选中: ${middleTierCount}个 (${(middleTierCount/selectedVideos.length*100).toFixed(1)}%)`);
+    this.log('debug', `后20%区间选中: ${bottomTierCount}个 (${(bottomTierCount/selectedVideos.length*100).toFixed(1)}%)`);
+
+    // 显示前几个被选中视频的原始位置
+    const topSelectedPositions = positions.slice(0, Math.min(5, positions.length)).sort((a, b) => a - b);
+    this.log('debug', `前5个选中视频的原始排序位置: [${topSelectedPositions.map(p => p + 1).join(', ')}]`);
+  }
+
   public async execute(parameters: Record<string, any>): Promise<any> {
     const { favoriteId, sortOrder, shuffleVideos, upTo, durationThreshold, ignoreFrontPage, ignoreTitleKeywords } = parameters;
 
@@ -169,7 +278,7 @@ export class MoveFavoriteToToviewExecutor extends ScriptExecutor {
     const ignorePageCount = ignoreFrontPage || 6;
 
     let originVideoInfos: VideoInfo[] = [];
-    const willMoveVideoInfos: VideoInfo[] = [];
+    let willMoveVideoInfos: VideoInfo[] = [];
 
     // 获取稍后再看当前数量
     try {
@@ -273,25 +382,9 @@ export class MoveFavoriteToToviewExecutor extends ScriptExecutor {
         break;
     }
 
-    // 检查是否需要随机打乱
-    if (shuffleEnabled) {
-      this.log('info', '已启用随机打乱，排序规则将失效');
-
-      // Fisher-Yates 洗牌算法
-      for (let i = originVideoInfos.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [originVideoInfos[i], originVideoInfos[j]] = [originVideoInfos[j], originVideoInfos[i]];
-      }
-
-      this.log('debug', `视频列表已随机打乱，共 ${originVideoInfos.length} 个视频`);
-      if (originVideoInfos.length > 0) {
-        this.log('debug', `打乱后第一个视频: ${originVideoInfos[0].title}`);
-        this.log('debug', `打乱后最后一个视频: ${originVideoInfos[originVideoInfos.length - 1].title}`);
-      }
-    }
-
-    // 过滤视频
+    // 先进行过滤，获取符合条件的视频
     this.log('debug', `正在过滤视频...`);
+    const filteredVideoInfos: any[] = [];
     for (const video of originVideoInfos) {
       if (ignoreTitleKeywordList.length > 0 && containsAnyKeyword(video.title, ignoreTitleKeywordList)) {
         continue;
@@ -299,12 +392,26 @@ export class MoveFavoriteToToviewExecutor extends ScriptExecutor {
       if (maxDuration > 0 && video.duration > maxDuration) {
         continue;
       }
-      willMoveVideoInfos.push(video);
-      if (willMoveVideoInfos.length >= needCount) break;
+      filteredVideoInfos.push(video);
     }
-    let log = `排序和过滤完成，共 ${willMoveVideoInfos.length} 个视频符合条件`;
-    log += `\n排序规则: ${shuffleEnabled ? '随机打乱（排序规则已失效）' : sortOrderValue}`;
-    log += `\n随机打乱: ${shuffleEnabled ? '已启用' : '未启用'}`;
+    this.log('debug', `过滤完成，共 ${filteredVideoInfos.length} 个视频符合条件`);
+
+    // 根据是否启用有偏向随机选择来决定最终的视频列表
+    if (shuffleEnabled && filteredVideoInfos.length > 0) {
+      this.log('info', '已启用有偏向随机选择，将基于排序结果进行加权随机选择');
+      willMoveVideoInfos = this.performWeightedRandomSelection(filteredVideoInfos, needCount);
+    } else {
+      // 传统模式：按排序顺序选择
+      willMoveVideoInfos = filteredVideoInfos.slice(0, needCount);
+    }
+    let log = `排序、过滤和选择完成，共 ${willMoveVideoInfos.length} 个视频将被添加`;
+    log += `\n排序规则: ${sortOrderValue}`;
+    log += `\n有偏向随机选择: ${shuffleEnabled ? '已启用' : '未启用'}`;
+    if (shuffleEnabled) {
+      log += `\n选择方式: 基于排序位置的加权随机选择`;
+    } else {
+      log += `\n选择方式: 按排序顺序依次选择`;
+    }
     log += `\n将要移动的视频列表: ${willMoveVideoInfos.map(v => v.title).join(', ')}`;
     this.log('debug', log);
     this.updateProgress(30);
