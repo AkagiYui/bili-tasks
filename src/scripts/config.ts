@@ -44,9 +44,9 @@ const ALL_SCRIPT_CONFIGS: ScriptConfig[] = [
   
   // 操作脚本
   {
-    id: 'move_shortest_to_toview',
-    name: '移动最短视频到稍后再看',
-    description: '从收藏夹随机页中选择时长最短的视频添加到稍后再看',
+    id: 'move_favorite_to_toview',
+    name: '移动收藏夹视频到稍后再看',
+    description: '从收藏夹中按指定规则选择视频添加到稍后再看',
     category: 'operation',
     isRunning: false,
     parameters: [
@@ -57,6 +57,19 @@ const ALL_SCRIPT_CONFIGS: ScriptConfig[] = [
         defaultValue: '',
         required: true,
         description: '要操作的收藏夹ID'
+      },
+      {
+        key: 'sortOrder',
+        label: '排序规则',
+        type: 'select',
+        defaultValue: 'original',
+        required: false,
+        description: '选择视频的排序方式，影响添加到稍后再看的顺序，不影响视频在收藏夹中的顺序',
+        options: [
+          { value: 'original', label: '收藏夹原始顺序' },
+          { value: 'shortest', label: '按时长从短到长排序' },
+          { value: 'longest', label: '按时长从长到短排序' }
+        ]
       },
       {
         key: 'upTo',

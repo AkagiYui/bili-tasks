@@ -148,17 +148,17 @@ export class VideoInfoExecutor extends ScriptExecutor {
 }
 
 /**
- * 移动最短视频到稍后再看执行器
+ * 移动收藏夹视频到稍后再看执行器
  */
-export class MoveShortestToToviewExecutor extends ScriptExecutor {
+export class MoveFavoriteToToviewExecutor extends ScriptExecutor {
   public async execute(parameters: Record<string, any>): Promise<any> {
-    const { favoriteId, upTo, durationThreshold, ignoreFrontPage, ignoreTitleKeywords } = parameters;
+    const { favoriteId, sortOrder, upTo, durationThreshold, ignoreFrontPage, ignoreTitleKeywords } = parameters;
 
     if (!favoriteId) {
       throw new Error('请输入收藏夹ID');
     }
 
-    this.log('info', `开始从收藏夹 ${favoriteId} 移动最短视频到稍后再看`);
+    this.log('info', `开始从收藏夹 ${favoriteId} 移动视频到稍后再看`);
     this.updateProgress(10);
 
     // 考虑以后能够使用更多的过滤参数，这里逐页获取视频列表
@@ -218,9 +218,41 @@ export class MoveShortestToToviewExecutor extends ScriptExecutor {
       throw error;
     }
 
+    // 根据排序规则对视频进行排序
+    const sortOrderValue = sortOrder || 'original';
+    this.log('debug', `正在按 ${sortOrderValue} 规则排序视频...`);
+    this.log('debug', `排序前视频数量: ${originVideoInfos.length}`);
+
+    switch (sortOrderValue) {
+      case 'shortest':
+        originVideoInfos = originVideoInfos.sort((a, b) => a.duration - b.duration);
+        this.log('debug', '已按时长从短到长排序');
+        if (originVideoInfos.length > 0) {
+          this.log('debug', `最短视频: ${originVideoInfos[0].title} (${originVideoInfos[0].duration}秒)`);
+          this.log('debug', `最长视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].duration}秒)`);
+        }
+        break;
+      case 'longest':
+        originVideoInfos = originVideoInfos.sort((a, b) => b.duration - a.duration);
+        this.log('debug', '已按时长从长到短排序');
+        if (originVideoInfos.length > 0) {
+          this.log('debug', `最长视频: ${originVideoInfos[0].title} (${originVideoInfos[0].duration}秒)`);
+          this.log('debug', `最短视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].duration}秒)`);
+        }
+        break;
+      case 'original':
+      default:
+        // 保持原始顺序，不进行排序
+        this.log('debug', '保持收藏夹原始顺序');
+        if (originVideoInfos.length > 0) {
+          this.log('debug', `第一个视频: ${originVideoInfos[0].title}`);
+          this.log('debug', `最后一个视频: ${originVideoInfos[originVideoInfos.length - 1].title}`);
+        }
+        break;
+    }
+
     // 过滤视频
     this.log('debug', `正在过滤视频...`);
-    originVideoInfos = originVideoInfos.sort((a, b) => a.duration - b.duration);
     for (const video of originVideoInfos) {
       if (ignoreTitleKeywordList.length > 0 && containsAnyKeyword(video.title, ignoreTitleKeywordList)) {
         continue;
@@ -231,7 +263,8 @@ export class MoveShortestToToviewExecutor extends ScriptExecutor {
       willMoveVideoInfos.push(video);
       if (willMoveVideoInfos.length >= needCount) break;
     }
-    let log = `过滤完成，共 ${willMoveVideoInfos.length} 个视频符合条件`;
+    let log = `排序和过滤完成，共 ${willMoveVideoInfos.length} 个视频符合条件`;
+    log += `\n排序规则: ${sortOrderValue}`;
     log += `\n将要移动的视频列表: ${willMoveVideoInfos.map(v => v.title).join(', ')}`;
     this.log('debug', log);
     this.updateProgress(30);

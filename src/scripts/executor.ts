@@ -1,7 +1,7 @@
 import { LogEntry, ScriptExecution } from '@/types';
 import { ScriptExecutor } from './base';
 import {
-  MoveShortestToToviewExecutor,
+  MoveFavoriteToToviewExecutor,
   AddToviewToFavoriteExecutor,
   MoveFavoriteExecutor,
   DeleteTimeoutLotteryExecutor,
@@ -23,8 +23,8 @@ export function createScriptExecutor(
       return new BvAvConverterExecutor(scriptId, onLog, onProgress);
     case 'show_resource_info':
       return new VideoInfoExecutor(scriptId, onLog, onProgress);
-    case 'move_shortest_to_toview':
-      return new MoveShortestToToviewExecutor(scriptId, onLog, onProgress);
+    case 'move_favorite_to_toview':
+      return new MoveFavoriteToToviewExecutor(scriptId, onLog, onProgress);
     case 'add_toview_to_favorite':
       return new AddToviewToFavoriteExecutor(scriptId, onLog, onProgress);
     case 'move_favorite_to_another':
