@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【哔哩哔哩】一些任务
 // @namespace    https://github.com/AkagiYui/UserScript
-// @version      0.0.3
+// @version      0.0.5
 // @author       AkagiYui
 // @description  可以一键执行一系列操作。
 // @license      MIT
@@ -853,9 +853,9 @@
     },
     // 操作脚本
     {
-      id: "move_shortest_to_toview",
-      name: "移动最短视频到稍后再看",
-      description: "从收藏夹随机页中选择时长最短的视频添加到稍后再看",
+      id: "move_favorite_to_toview",
+      name: "移动收藏夹视频到稍后再看",
+      description: "从收藏夹中按指定规则选择视频添加到稍后再看",
       category: "operation",
       isRunning: false,
       parameters: [
@@ -866,6 +866,27 @@
           defaultValue: "",
           required: true,
           description: "要操作的收藏夹ID"
+        },
+        {
+          key: "sortOrder",
+          label: "排序规则",
+          type: "select",
+          defaultValue: "original",
+          required: false,
+          description: "选择视频的排序方式，影响添加到稍后再看的顺序，不影响视频在收藏夹中的顺序",
+          options: [
+            { value: "original", label: "收藏夹原始顺序" },
+            { value: "shortest", label: "按时长从短到长排序" },
+            { value: "longest", label: "按时长从长到短排序" }
+          ]
+        },
+        {
+          key: "shuffleVideos",
+          label: "随机打乱视频顺序",
+          type: "boolean",
+          defaultValue: false,
+          required: false,
+          description: "启用后将在排序完成后随机打乱视频列表，此时排序规则将失效，适用于随机观看场景"
         },
         {
           key: "upTo",
@@ -1635,20 +1656,20 @@
       return { results, total: results.length, successCount, failCount };
     }
   }
-  class MoveShortestToToviewExecutor extends ScriptExecutor {
+  class MoveFavoriteToToviewExecutor extends ScriptExecutor {
     async execute(parameters) {
-      const { favoriteId, upTo, durationThreshold, ignoreFrontPage, ignoreTitleKeywords } = parameters;
+      const { favoriteId, sortOrder, shuffleVideos, upTo, durationThreshold, ignoreFrontPage, ignoreTitleKeywords } = parameters;
       if (!favoriteId) {
         throw new Error("请输入收藏夹ID");
       }
-      this.log("info", `开始从收藏夹 ${favoriteId} 移动最短视频到稍后再看`);
+      this.log("info", `开始从收藏夹 ${favoriteId} 移动视频到稍后再看`);
       this.updateProgress(10);
       const ignoreTitleKeywordList = ignoreTitleKeywords ? ignoreTitleKeywords.split(",").map((k2) => k2.trim()) : [];
       const maxCount = upTo || 1e3;
       let needCount = maxCount;
       const maxDuration = durationThreshold || 0;
       const ignorePageCount = ignoreFrontPage || 6;
-      const originVideoInfos = [];
+      let originVideoInfos = [];
       const willMoveVideoInfos = [];
       try {
         this.log("info", `正在获取稍后再看当前数量...`);
@@ -1694,6 +1715,51 @@
         this.log("error", `获取源收藏夹视频失败: ${error instanceof Error ? error.message : String(error)}`);
         throw error;
       }
+      const sortOrderValue = sortOrder || "original";
+      const shuffleEnabled = shuffleVideos === true;
+      this.log("debug", `正在按 ${sortOrderValue} 规则排序视频...`);
+      this.log("debug", `排序前视频数量: ${originVideoInfos.length}`);
+      if (shuffleEnabled) {
+        this.log("debug", "注意：已启用随机打乱，排序完成后将被随机打乱覆盖");
+      }
+      switch (sortOrderValue) {
+        case "shortest":
+          originVideoInfos = originVideoInfos.sort((a2, b) => a2.duration - b.duration);
+          this.log("debug", "已按时长从短到长排序");
+          if (originVideoInfos.length > 0) {
+            this.log("debug", `最短视频: ${originVideoInfos[0].title} (${originVideoInfos[0].duration}秒)`);
+            this.log("debug", `最长视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].duration}秒)`);
+          }
+          break;
+        case "longest":
+          originVideoInfos = originVideoInfos.sort((a2, b) => b.duration - a2.duration);
+          this.log("debug", "已按时长从长到短排序");
+          if (originVideoInfos.length > 0) {
+            this.log("debug", `最长视频: ${originVideoInfos[0].title} (${originVideoInfos[0].duration}秒)`);
+            this.log("debug", `最短视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].duration}秒)`);
+          }
+          break;
+        case "original":
+        default:
+          this.log("debug", "保持收藏夹原始顺序");
+          if (originVideoInfos.length > 0) {
+            this.log("debug", `第一个视频: ${originVideoInfos[0].title}`);
+            this.log("debug", `最后一个视频: ${originVideoInfos[originVideoInfos.length - 1].title}`);
+          }
+          break;
+      }
+      if (shuffleEnabled) {
+        this.log("info", "已启用随机打乱，排序规则将失效");
+        for (let i2 = originVideoInfos.length - 1; i2 > 0; i2--) {
+          const j2 = Math.floor(Math.random() * (i2 + 1));
+          [originVideoInfos[i2], originVideoInfos[j2]] = [originVideoInfos[j2], originVideoInfos[i2]];
+        }
+        this.log("debug", `视频列表已随机打乱，共 ${originVideoInfos.length} 个视频`);
+        if (originVideoInfos.length > 0) {
+          this.log("debug", `打乱后第一个视频: ${originVideoInfos[0].title}`);
+          this.log("debug", `打乱后最后一个视频: ${originVideoInfos[originVideoInfos.length - 1].title}`);
+        }
+      }
       this.log("debug", `正在过滤视频...`);
       for (const video of originVideoInfos) {
         if (ignoreTitleKeywordList.length > 0 && containsAnyKeyword(video.title, ignoreTitleKeywordList)) {
@@ -1705,7 +1771,11 @@
         willMoveVideoInfos.push(video);
         if (willMoveVideoInfos.length >= needCount) break;
       }
-      let log = `过滤完成，共 ${willMoveVideoInfos.length} 个视频符合条件`;
+      let log = `排序和过滤完成，共 ${willMoveVideoInfos.length} 个视频符合条件`;
+      log += `
+排序规则: ${shuffleEnabled ? "随机打乱（排序规则已失效）" : sortOrderValue}`;
+      log += `
+随机打乱: ${shuffleEnabled ? "已启用" : "未启用"}`;
       log += `
 将要移动的视频列表: ${willMoveVideoInfos.map((v2) => v2.title).join(", ")}`;
       this.log("debug", log);
@@ -2077,8 +2147,8 @@
         return new BvAvConverterExecutor(scriptId, onLog, onProgress);
       case "show_resource_info":
         return new VideoInfoExecutor(scriptId, onLog, onProgress);
-      case "move_shortest_to_toview":
-        return new MoveShortestToToviewExecutor(scriptId, onLog, onProgress);
+      case "move_favorite_to_toview":
+        return new MoveFavoriteToToviewExecutor(scriptId, onLog, onProgress);
       case "add_toview_to_favorite":
         return new AddToviewToFavoriteExecutor(scriptId, onLog, onProgress);
       case "move_favorite_to_another":
