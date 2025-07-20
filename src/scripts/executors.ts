@@ -246,6 +246,22 @@ export class MoveFavoriteToToviewExecutor extends ScriptExecutor {
           this.log('debug', `最短视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].duration}秒)`);
         }
         break;
+      case 'play_asc':
+        originVideoInfos = originVideoInfos.sort((a, b) => (a.cnt_info?.play || 0) - (b.cnt_info?.play || 0));
+        this.log('debug', '已按播放数从少到多排序');
+        if (originVideoInfos.length > 0) {
+          this.log('debug', `播放数最少视频: ${originVideoInfos[0].title} (${originVideoInfos[0].cnt_info?.play || 0}次播放)`);
+          this.log('debug', `播放数最多视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].cnt_info?.play || 0}次播放)`);
+        }
+        break;
+      case 'play_desc':
+        originVideoInfos = originVideoInfos.sort((a, b) => (b.cnt_info?.play || 0) - (a.cnt_info?.play || 0));
+        this.log('debug', '已按播放数从多到少排序');
+        if (originVideoInfos.length > 0) {
+          this.log('debug', `播放数最多视频: ${originVideoInfos[0].title} (${originVideoInfos[0].cnt_info?.play || 0}次播放)`);
+          this.log('debug', `播放数最少视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].cnt_info?.play || 0}次播放)`);
+        }
+        break;
       case 'original':
       default:
         // 保持原始顺序，不进行排序

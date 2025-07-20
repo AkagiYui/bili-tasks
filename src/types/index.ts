@@ -85,6 +85,11 @@ export interface VideoInfo {
     mid: number;
     name: string;
   };
+  cnt_info: {
+    collect: number; // 收藏数
+    danmaku: number; // 弹幕数
+    play: number; // 播放数
+  }
 }
 
 export interface FavoriteInfo {

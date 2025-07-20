@@ -68,7 +68,9 @@ const ALL_SCRIPT_CONFIGS: ScriptConfig[] = [
         options: [
           { value: 'original', label: '收藏夹原始顺序' },
           { value: 'shortest', label: '按时长从短到长排序' },
-          { value: 'longest', label: '按时长从长到短排序' }
+          { value: 'longest', label: '按时长从长到短排序' },
+          { value: 'play_asc', label: '按播放数从少到多排序' },
+          { value: 'play_desc', label: '按播放数从多到少排序' }
         ]
       },
       {
