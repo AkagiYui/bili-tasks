@@ -56,6 +56,18 @@ export function Modal({ isOpen, onClose, children }: ModalProps): JSX.Element | 
     >
       <div class={`modal-content ${isClosing ? 'modal-content--closing' : ''}`}>
         <div class="modal-header">
+          <div class="modal-header-info">
+            <span class="modal-title">【哔哩哔哩】一些任务</span>
+            <a
+              href="https://github.com/AkagiYui"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="modal-repo-link"
+              title="访问作者仓库"
+            >
+              AkagiYui
+            </a>
+          </div>
           <button
             class="modal-close-button"
             onClick={handleClose}

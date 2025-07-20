@@ -184,6 +184,37 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
+/* 专门针对select下拉选项的样式优化 */
+.script-select {
+  /* 确保select元素本身的样式 */
+  background: rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.script-select option {
+  /* 强制设置option的样式 */
+  background: #2a2a2a;
+  color: #ffffff;
+  padding: 8px 12px;
+  border: none;
+  font-size: 0.9rem;
+}
+
+/* 针对不同浏览器的option样式兼容性 */
+.script-select option:hover,
+.script-select option:focus {
+  background: #3a3a3a;
+  color: #ffffff;
+}
+
+.script-select option:checked,
+.script-select option:selected {
+  background: #4a4a4a;
+  color: #ffffff;
+  font-weight: 500;
+}
+
 .script-input:focus,
 .script-select:focus,
 .script-textarea:focus {

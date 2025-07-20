@@ -295,26 +295,6 @@ export function ScriptManager(): JSX.Element {
 
   return (
     <div class="script-manager" ref={containerRef}>
-      <div class="script-manager-header">
-        <h1>【哔哩哔哩】一些任务</h1>
-        <p>作者：AkagiYui | 仓库：<a href="https://github.com/AkagiYui" target="_blank" rel="noopener noreferrer">github.com/AkagiYui</a></p>
-        <div class="status-bar">
-          <div class="status-item">
-            <span class="status-label">工具脚本:</span>
-            <span class="status-value">{toolScripts.length}</span>
-          </div>
-          <div class="status-item">
-            <span class="status-label">操作脚本:</span>
-            <span class="status-value">{operationScripts.length}</span>
-          </div>
-          <div class="status-item">
-            <span class="status-label">运行中:</span>
-            <span class="status-value running">
-              {appState.scripts.filter(s => s.isRunning).length}
-            </span>
-          </div>
-        </div>
-      </div>
 
       <div class="script-manager-content">
         <div
