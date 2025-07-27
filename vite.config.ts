@@ -28,7 +28,7 @@ export default defineConfig({
         homepage: 'https://github.com/AkagiYui',
         author: 'AkagiYui',
         license: 'MIT',
-        version: '0.0.8',
+        version: '0.0.9',
       },
 
       build: {

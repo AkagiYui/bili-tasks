@@ -371,7 +371,8 @@ export class MoveFavoriteToToviewExecutor extends ScriptExecutor {
         break;
       case 'original':
       default:
-        // 保持原始顺序，不进行排序
+        // 保持收藏夹原始顺序，实际上是要倒序。最后添加到收藏夹的视频应该最后添加到稍后再看。
+        originVideoInfos = originVideoInfos.reverse();
         break;
     }
 

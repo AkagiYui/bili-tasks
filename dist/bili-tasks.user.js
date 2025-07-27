@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【哔哩哔哩】一些任务
 // @namespace    https://github.com/AkagiYui/UserScript
-// @version      0.0.8
+// @version      0.0.9
 // @author       AkagiYui
 // @description  可以一键执行一系列操作。
 // @license      MIT
@@ -1865,6 +1865,10 @@
 播放数最少视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${((_d = originVideoInfos[originVideoInfos.length - 1].cnt_info) == null ? void 0 : _d.play) || 0}次播放)`;
           }
           this.log("debug", log2);
+          break;
+        case "original":
+        default:
+          originVideoInfos = originVideoInfos.reverse();
           break;
       }
       const filteredVideoInfos = [];
