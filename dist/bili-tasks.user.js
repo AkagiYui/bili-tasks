@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         【哔哩哔哩】一些任务
 // @namespace    https://github.com/AkagiYui/UserScript
-// @version      0.0.7
+// @version      0.0.8
 // @author       AkagiYui
 // @description  可以一键执行一系列操作。
 // @license      MIT
@@ -1766,7 +1766,7 @@
       const maxCount = upTo || 1e3;
       let needCount = maxCount;
       const maxDuration = durationThreshold || 0;
-      const ignorePageCount = ignoreFrontPage || 6;
+      const ignorePageCount = ignoreFrontPage ?? 0;
       let originVideoInfos = [];
       let willMoveVideoInfos = [];
       try {
@@ -1815,60 +1815,58 @@
       }
       const sortOrderValue = sortOrder || "original";
       const shuffleEnabled = shuffleVideos === true;
-      this.log("debug", `正在按 ${sortOrderValue} 规则排序视频...`);
-      this.log("debug", `排序前视频数量: ${originVideoInfos.length}`);
-      if (shuffleEnabled) {
-        this.log("debug", "注意：已启用随机打乱，排序完成后将被随机打乱覆盖");
-      }
+      this.log("debug", `正在按 ${sortOrderValue} 规则排序视频`);
       switch (sortOrderValue) {
         case "shortest":
           originVideoInfos = originVideoInfos.sort((a2, b) => a2.duration - b.duration);
-          this.log("debug", "已按时长从短到长排序");
+          let log2 = `已按时长从短到长排序`;
           if (originVideoInfos.length > 0) {
-            this.log("debug", `最短视频: ${originVideoInfos[0].title} (${originVideoInfos[0].duration}秒)`);
-            this.log("debug", `最长视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].duration}秒)`);
+            log2 += `最短视频: ${originVideoInfos[0].title} (${originVideoInfos[0].duration}秒)`;
+            log2 += `
+最长视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].duration}秒)`;
           }
+          this.log("debug", log2);
           break;
         case "longest":
           originVideoInfos = originVideoInfos.sort((a2, b) => b.duration - a2.duration);
-          this.log("debug", "已按时长从长到短排序");
+          log2 = `已按时长从长到短排序`;
           if (originVideoInfos.length > 0) {
-            this.log("debug", `最长视频: ${originVideoInfos[0].title} (${originVideoInfos[0].duration}秒)`);
-            this.log("debug", `最短视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].duration}秒)`);
+            log2 += `
+最长视频: ${originVideoInfos[0].title} (${originVideoInfos[0].duration}秒)`;
+            log2 += `
+最短视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].duration}秒)`;
           }
+          this.log("debug", log2);
           break;
         case "play_asc":
           originVideoInfos = originVideoInfos.sort((a2, b) => {
             var _a2, _b2;
             return (((_a2 = a2.cnt_info) == null ? void 0 : _a2.play) || 0) - (((_b2 = b.cnt_info) == null ? void 0 : _b2.play) || 0);
           });
-          this.log("debug", "已按播放数从少到多排序");
+          log2 = `已按播放数从少到多排序`;
           if (originVideoInfos.length > 0) {
-            this.log("debug", `播放数最少视频: ${originVideoInfos[0].title} (${((_a = originVideoInfos[0].cnt_info) == null ? void 0 : _a.play) || 0}次播放)`);
-            this.log("debug", `播放数最多视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${((_b = originVideoInfos[originVideoInfos.length - 1].cnt_info) == null ? void 0 : _b.play) || 0}次播放)`);
+            log2 += `
+播放数最少视频: ${originVideoInfos[0].title} (${((_a = originVideoInfos[0].cnt_info) == null ? void 0 : _a.play) || 0}次播放)`;
+            log2 += `
+播放数最多视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${((_b = originVideoInfos[originVideoInfos.length - 1].cnt_info) == null ? void 0 : _b.play) || 0}次播放)`;
           }
+          this.log("debug", log2);
           break;
         case "play_desc":
           originVideoInfos = originVideoInfos.sort((a2, b) => {
             var _a2, _b2;
             return (((_a2 = b.cnt_info) == null ? void 0 : _a2.play) || 0) - (((_b2 = a2.cnt_info) == null ? void 0 : _b2.play) || 0);
           });
-          this.log("debug", "已按播放数从多到少排序");
+          log2 = `已按播放数从多到少排序`;
           if (originVideoInfos.length > 0) {
-            this.log("debug", `播放数最多视频: ${originVideoInfos[0].title} (${((_c = originVideoInfos[0].cnt_info) == null ? void 0 : _c.play) || 0}次播放)`);
-            this.log("debug", `播放数最少视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${((_d = originVideoInfos[originVideoInfos.length - 1].cnt_info) == null ? void 0 : _d.play) || 0}次播放)`);
+            log2 += `
+播放数最多视频: ${originVideoInfos[0].title} (${((_c = originVideoInfos[0].cnt_info) == null ? void 0 : _c.play) || 0}次播放)`;
+            log2 += `
+播放数最少视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${((_d = originVideoInfos[originVideoInfos.length - 1].cnt_info) == null ? void 0 : _d.play) || 0}次播放)`;
           }
-          break;
-        case "original":
-        default:
-          this.log("debug", "保持收藏夹原始顺序");
-          if (originVideoInfos.length > 0) {
-            this.log("debug", `第一个视频: ${originVideoInfos[0].title}`);
-            this.log("debug", `最后一个视频: ${originVideoInfos[originVideoInfos.length - 1].title}`);
-          }
+          this.log("debug", log2);
           break;
       }
-      this.log("debug", `正在过滤视频...`);
       const filteredVideoInfos = [];
       for (const video of originVideoInfos) {
         if (ignoreTitleKeywordList.length > 0 && containsAnyKeyword(video.title, ignoreTitleKeywordList)) {
@@ -1879,7 +1877,7 @@
         }
         filteredVideoInfos.push(video);
       }
-      this.log("debug", `过滤完成，共 ${filteredVideoInfos.length} 个视频符合条件`);
+      this.log("debug", `视频过滤完成，共 ${filteredVideoInfos.length} 个视频符合条件`);
       if (shuffleEnabled && filteredVideoInfos.length > 0) {
         this.log("info", "已启用有偏向随机选择，将基于排序结果进行加权随机选择");
         willMoveVideoInfos = this.performWeightedRandomSelection(filteredVideoInfos, needCount);
@@ -1906,7 +1904,7 @@
       for (let i2 = 0; i2 < willMoveVideoInfos.length; i2++) {
         this.checkShouldStop();
         const video = willMoveVideoInfos[i2];
-        this.log("info", `正在添加: ${video.title} (${i2 + 1}/${willMoveVideoInfos.length})`);
+        this.log("debug", `正在添加: ${video.title} (${i2 + 1}/${willMoveVideoInfos.length})`);
         try {
           await addToToView(video.id);
           this.log("success", `添加成功: ${video.title}`);
