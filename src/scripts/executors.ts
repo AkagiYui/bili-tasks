@@ -275,7 +275,7 @@ export class MoveFavoriteToToviewExecutor extends ScriptExecutor {
     const maxCount = upTo || 1000;
     let needCount = maxCount;
     const maxDuration = durationThreshold || 0;
-    const ignorePageCount = ignoreFrontPage || 6;
+    const ignorePageCount = ignoreFrontPage ?? 0;
 
     let originVideoInfos: VideoInfo[] = [];
     let willMoveVideoInfos: VideoInfo[] = [];
@@ -331,70 +331,64 @@ export class MoveFavoriteToToviewExecutor extends ScriptExecutor {
     const sortOrderValue = sortOrder || 'original';
     const shuffleEnabled = shuffleVideos === true;
 
-    this.log('debug', `正在按 ${sortOrderValue} 规则排序视频...`);
-    this.log('debug', `排序前视频数量: ${originVideoInfos.length}`);
-
-    if (shuffleEnabled) {
-      this.log('debug', '注意：已启用随机打乱，排序完成后将被随机打乱覆盖');
-    }
-
+    this.log('debug', `正在按 ${sortOrderValue} 规则排序视频`);
     switch (sortOrderValue) {
       case 'shortest':
         originVideoInfos = originVideoInfos.sort((a, b) => a.duration - b.duration);
-        this.log('debug', '已按时长从短到长排序');
+        let log = `已按时长从短到长排序`;
         if (originVideoInfos.length > 0) {
-          this.log('debug', `最短视频: ${originVideoInfos[0].title} (${originVideoInfos[0].duration}秒)`);
-          this.log('debug', `最长视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].duration}秒)`);
+          log += `最短视频: ${originVideoInfos[0].title} (${originVideoInfos[0].duration}秒)`;
+          log += `\n最长视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].duration}秒)`;
         }
+        this.log('debug', log);
         break;
       case 'longest':
         originVideoInfos = originVideoInfos.sort((a, b) => b.duration - a.duration);
-        this.log('debug', '已按时长从长到短排序');
+        log = `已按时长从长到短排序`;
         if (originVideoInfos.length > 0) {
-          this.log('debug', `最长视频: ${originVideoInfos[0].title} (${originVideoInfos[0].duration}秒)`);
-          this.log('debug', `最短视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].duration}秒)`);
+          log += `\n最长视频: ${originVideoInfos[0].title} (${originVideoInfos[0].duration}秒)`;
+          log += `\n最短视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].duration}秒)`;
         }
+        this.log('debug', log);
         break;
       case 'play_asc':
         originVideoInfos = originVideoInfos.sort((a, b) => (a.cnt_info?.play || 0) - (b.cnt_info?.play || 0));
-        this.log('debug', '已按播放数从少到多排序');
+        log = `已按播放数从少到多排序`;
         if (originVideoInfos.length > 0) {
-          this.log('debug', `播放数最少视频: ${originVideoInfos[0].title} (${originVideoInfos[0].cnt_info?.play || 0}次播放)`);
-          this.log('debug', `播放数最多视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].cnt_info?.play || 0}次播放)`);
+          log += `\n播放数最少视频: ${originVideoInfos[0].title} (${originVideoInfos[0].cnt_info?.play || 0}次播放)`;
+          log += `\n播放数最多视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].cnt_info?.play || 0}次播放)`;
         }
+        this.log('debug', log);
         break;
       case 'play_desc':
         originVideoInfos = originVideoInfos.sort((a, b) => (b.cnt_info?.play || 0) - (a.cnt_info?.play || 0));
-        this.log('debug', '已按播放数从多到少排序');
+        log = `已按播放数从多到少排序`;
         if (originVideoInfos.length > 0) {
-          this.log('debug', `播放数最多视频: ${originVideoInfos[0].title} (${originVideoInfos[0].cnt_info?.play || 0}次播放)`);
-          this.log('debug', `播放数最少视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].cnt_info?.play || 0}次播放)`);
+          log += `\n播放数最多视频: ${originVideoInfos[0].title} (${originVideoInfos[0].cnt_info?.play || 0}次播放)`;
+          log += `\n播放数最少视频: ${originVideoInfos[originVideoInfos.length - 1].title} (${originVideoInfos[originVideoInfos.length - 1].cnt_info?.play || 0}次播放)`;
         }
+        this.log('debug', log);
         break;
       case 'original':
       default:
         // 保持原始顺序，不进行排序
-        this.log('debug', '保持收藏夹原始顺序');
-        if (originVideoInfos.length > 0) {
-          this.log('debug', `第一个视频: ${originVideoInfos[0].title}`);
-          this.log('debug', `最后一个视频: ${originVideoInfos[originVideoInfos.length - 1].title}`);
-        }
         break;
     }
 
     // 先进行过滤，获取符合条件的视频
-    this.log('debug', `正在过滤视频...`);
     const filteredVideoInfos: any[] = [];
     for (const video of originVideoInfos) {
+      // 检查标题是否包含忽略关键词
       if (ignoreTitleKeywordList.length > 0 && containsAnyKeyword(video.title, ignoreTitleKeywordList)) {
         continue;
       }
+      // 检查时长是否超过阈值
       if (maxDuration > 0 && video.duration > maxDuration) {
         continue;
       }
       filteredVideoInfos.push(video);
     }
-    this.log('debug', `过滤完成，共 ${filteredVideoInfos.length} 个视频符合条件`);
+    this.log('debug', `视频过滤完成，共 ${filteredVideoInfos.length} 个视频符合条件`);
 
     // 根据是否启用有偏向随机选择来决定最终的视频列表
     if (shuffleEnabled && filteredVideoInfos.length > 0) {
@@ -421,7 +415,7 @@ export class MoveFavoriteToToviewExecutor extends ScriptExecutor {
     for (let i = 0; i < willMoveVideoInfos.length; i++) {
       this.checkShouldStop();
       const video = willMoveVideoInfos[i];
-      this.log('info', `正在添加: ${video.title} (${i + 1}/${willMoveVideoInfos.length})`);
+      this.log('debug', `正在添加: ${video.title} (${i + 1}/${willMoveVideoInfos.length})`);
       try {
         await addToToView(video.id);
         this.log('success', `添加成功: ${video.title}`);
@@ -436,9 +430,7 @@ export class MoveFavoriteToToviewExecutor extends ScriptExecutor {
     // 从收藏夹中删除
     this.log('info', `正在从收藏夹中删除已移动的视频...`);
     try {
-      await deleteFromFavorite(
-        favoriteId,
-        willMoveVideoInfos.map(v => ({ id: v.id, type: v.type }))
+      await deleteFromFavorite(favoriteId, willMoveVideoInfos.map(v => ({ id: v.id, type: v.type }))
       );
       this.log('success', `删除成功`);
       this.updateProgress(100);
